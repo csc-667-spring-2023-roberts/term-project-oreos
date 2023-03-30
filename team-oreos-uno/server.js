@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, "backend", "static")));
 const rootRoutes = require("./backend/routes/root");
 app.use("/", rootRoutes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 2000;
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
