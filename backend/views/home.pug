@@ -1,6 +1,15 @@
-extends layout
+extend layout 
 
 block content
-  h1= title
-
-  p= message
+  h1 Home Page (Unauthenticated)
+  ul
+    li
+      a(href='/') Home
+    li
+      a(href='/authentication/login') Login
+    li
+      a(href='/authentication/sign-up') Sign Up
+    li
+      a(href='/lobby') Lobby
+    li
+      a(href='/games/42') Game (42)

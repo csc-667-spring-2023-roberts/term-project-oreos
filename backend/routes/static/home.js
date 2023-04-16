@@ -1,0 +1,8 @@
+const express = require("express");
+const router = express.Router();
+
+router.get("/", (request, response) => {
+  response.render("home", { title: "Term Project Oreo" });
+});
+
+module.exports = router;

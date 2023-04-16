@@ -6,6 +6,11 @@ const morgan = require("morgan");
 const express = require("express");
 const app = express();
 
+const homeRoutes = require("./backend/routes/static/home.js");
+const gamesRoutes = require("./backend/routes/static/games.js");
+const lobbyRoutes = require("./backend/routes/static/lobby.js");
+const authenticationRoutes = require("./backend/routes/static/authentication.js");
+
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -14,8 +19,10 @@ app.set("views", path.join(__dirname, "backend", "views"));
 app.set("view engine", "pug");
 app.use(express.static(path.join(__dirname, "backend", "static")));
 
-const rootRoutes = require("./backend/routes/root");
-app.use("/", rootRoutes);
+app.use("/", homeRoutes);
+app.use("/games", gamesRoutes);
+app.use("/lobby", lobbyRoutes);
+app.use("/authentication", authenticationRoutes);
 
 const PORT = process.env.PORT || 2000;
 
