@@ -10,6 +10,8 @@ const homeRoutes = require("./backend/routes/static/home.js");
 const gamesRoutes = require("./backend/routes/static/games.js");
 const lobbyRoutes = require("./backend/routes/static/lobby.js");
 const authenticationRoutes = require("./backend/routes/static/authentication.js");
+const users = require("./backend/routes/users.js");
+const games = require("./backend/routes/games.js");
 
 app.use(morgan("dev"));
 app.use(express.json());
@@ -23,6 +25,8 @@ app.use("/", homeRoutes);
 app.use("/games", gamesRoutes);
 app.use("/lobby", lobbyRoutes);
 app.use("/authentication", authenticationRoutes);
+app.use("/api/users", users);
+app.use("/api/games", games);
 
 const PORT = process.env.PORT || 2000;
 
