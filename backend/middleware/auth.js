@@ -1,11 +1,23 @@
-const isAuthenticated = (request, response, next) => {
-  const { user } = request.session;
+const Auth = {};
+
+Auth.isAuthenticated = (req, res, next) => {
+  const { user } = req.session;
 
   if (user !== undefined && user.id !== undefined) {
     next();
   } else {
-    response.redirect("/authentication/login");
+    res.redirect("/authentication/login");
   }
 };
 
-module.exports = isAuthenticated;
+Auth.redirectToLobby = (req, res, next) => {
+  const { user } = req.session;
+
+  if (user !== undefined && user.id !== undefined) {
+    res.redirect("/lobby");
+  } else {
+    next();
+  }
+};
+
+module.exports = Auth;

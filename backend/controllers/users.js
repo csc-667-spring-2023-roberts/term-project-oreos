@@ -43,12 +43,15 @@ User.signup = async (req, res) => {
 
   try {
     // TODO replace with database data
-    const { id } = 1; //await Users.create(username, email, hash);
+    const id = 1; //await Users.create(username, email, hash);
     req.session.user = {
       id,
       username,
       email,
     };
+
+    console.log("signed up");
+    console.log(req.session.user);
 
     res.redirect("/lobby");
   } catch (error) {
