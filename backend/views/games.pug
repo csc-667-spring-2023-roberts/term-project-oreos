@@ -1,6 +1,8 @@
 extend layout 
 
 block content
+  head 
+    script(src='/scripts/game.js', defer)
   h1 Game #{id} Page (Authenticated)
   ul
     li
@@ -13,3 +15,4 @@ block content
       a(href='/lobby') Lobby
     li
       a(href='/games/42') Game (42)
+  
