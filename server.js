@@ -2,11 +2,12 @@ const path = require("path");
 const createError = require("http-errors");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
+const testRoutes = require("./backend/routes/test/index.js");
 
 const express = require("express");
-// const session = require("express-session");
+const session = require("express-session");
 const app = express();
-// require("dotenv").config();
+require("dotenv").config();
 
 const homeRoutes = require("./backend/routes/static/home.js");
 const gamesRoutes = require("./backend/routes/static/games.js");
@@ -23,6 +24,7 @@ const games = require("./backend/routes/games.js");
 // });
 
 // app.use(sessionMiddleware);
+app.use("/test", testRoutes);
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
