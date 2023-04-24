@@ -4,9 +4,9 @@ const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 
 const express = require("express");
+const session = require("express-session");
 const app = express();
-app.use(express.static('css'));
-
+require("dotenv").config();
 
 const homeRoutes = require("./backend/routes/static/home.js");
 const gamesRoutes = require("./backend/routes/static/games.js");
@@ -15,6 +15,14 @@ const authenticationRoutes = require("./backend/routes/static/authentication.js"
 const users = require("./backend/routes/users.js");
 const games = require("./backend/routes/games.js");
 
+const sessionMiddleware = session({
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
+});
+
+app.use(sessionMiddleware);
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
