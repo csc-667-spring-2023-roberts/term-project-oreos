@@ -2,8 +2,8 @@ const express = require("express");
 
 const router = express.Router();
 
-router.get("/sign-up", (_request, response) => {
-  response.render("sign-up", { title: "Term Project Oreos" });
+router.get("/register", (_request, response) => {
+  response.render("register", { title: "Term Project Oreos" });
 });
 
 router.get("/login", (_request, response) => {

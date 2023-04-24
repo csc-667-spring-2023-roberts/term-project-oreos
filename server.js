@@ -5,6 +5,8 @@ const morgan = require("morgan");
 
 const express = require("express");
 const app = express();
+app.use(express.static('css'));
+
 
 const homeRoutes = require("./backend/routes/static/home.js");
 const gamesRoutes = require("./backend/routes/static/games.js");
@@ -28,7 +30,7 @@ app.use("/authentication", authenticationRoutes);
 app.use("/api/users", users);
 app.use("/api/games", games);
 
-const PORT = process.env.PORT || 2000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);

@@ -1,11 +1,10 @@
 extends auth-layout
 
 block content
-
-  div.register
-    div.register__container
-      h1 LOGIN
-      form(method='post' action='/authnetication/register')
+    div.register
+      div.register__container
+        h1 REGISTER
+        form(method='post' action='/authnetication/register')
           label
           div.register__textBox
             em Username  
@@ -18,4 +17,6 @@ block content
           div.register__textBox
             em Password  
             input(name='password' type='password' autocomplete='new-password')
-          input.register__btn(type='submit' value='Login')      
+          input.register__btn(type='submit' value='Register')         
+
+    
