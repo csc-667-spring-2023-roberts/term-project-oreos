@@ -1,8 +1,24 @@
 const Game = {};
 
 Game.createGame = async (req, res) => {
-  // TODO implement
-  res.send({ message: "Game created" });
+  const { gametitle, count, user_id } = req.body;
+
+  if (!user_id || gametitle.trim().length === 0 || !count) {
+    res.send({ message: "Please fill out game info" });
+    return;
+  }
+
+  // Insert info into db
+  // use db column id as game id
+
+  res.send({
+    message: {
+      game_id: 1,
+      gametitle: gametitle,
+      player_count: count,
+      user_id: user_id,
+    },
+  });
 };
 
 Game.startGame = async (req, res) => {

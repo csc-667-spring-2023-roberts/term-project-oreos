@@ -2,5 +2,25 @@ extends layout
 
 block content
   head 
-    script(src='/scripts/lobby.js', defer)
+    script(src='/scripts/lobby.js')
   h1 Lobby Page (Authenticated)
+  
+  form(id="create-game-form-id" onsubmit="createGame(); return false;")
+    label
+    div.register__textBox
+      em Game Title
+      input(name='gametitle' placeholder='game title')
+    label
+    div.register__textBox
+      em Number of Players
+      input(name='count' type="number" placeholder='Number of players')
+    input.register__btn(type='submit' value='Create')  
+
+  h1 Games List
+  ul(id="games-list-id")
+  
+  
+           
+
+
+
