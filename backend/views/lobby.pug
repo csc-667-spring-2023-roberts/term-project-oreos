@@ -2,5 +2,39 @@ extends layout
 
 block content
   head 
+    link(rel='stylesheet' href='/stylesheets/lobby.css')
     script(src='/scripts/lobby.js', defer)
   h1 Lobby Page (Authenticated)
+
+
+  div(class="game-form-container")
+    form(id="create-game-form-id" onsubmit="createGame(); return false;")
+      label
+      div.register__textBox
+        em Game Title
+        input(name='gametitle' placeholder='game title' required)
+      label
+      div.register__textBox
+        em Number of Players
+        input(name='count' type="number" placeholder='Number of players' required)
+      input.register__btn(type='submit' value='Create')  
+  
+  div(class="chat-form-container")
+    form(id="send-chat-form-id" onsubmit="sendMessage(); return false;")
+      em Message
+      input(type='text' name="message" required)
+      input(type='submit' value='Send')  
+    
+  div(class="list-container")
+    div(class="chat-list-container")
+      h1 Chat
+      ul(class="chat-list" id="chat-list-id")
+    div(class="game-list-container")
+      h1 Games List
+      ul(class="game-list" id="games-list-id")
+  
+  
+           
+
+
+

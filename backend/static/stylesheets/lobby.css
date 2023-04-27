@@ -1,0 +1,33 @@
+.list-container {
+  display: flex;
+}
+
+.game-list-container {
+  display: block;
+}
+
+.chat-list-container {
+  display: block;
+}
+
+.game-list {
+  border: 2px solid blue;
+  width: 400px;
+  height: 200px;
+  overflow-y: scroll;
+}
+
+.chat-list {
+  border: 2px solid white;
+  width: 400px;
+  height: 200px;
+  overflow-y: scroll;
+}
+
+.game-form-container {
+  border: 2px solid blue;
+}
+
+.chat-form-container {
+  border: 2px solid white;
+}

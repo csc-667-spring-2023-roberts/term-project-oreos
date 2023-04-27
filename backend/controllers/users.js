@@ -74,4 +74,9 @@ User.signout = async (req, res) => {
   }
 };
 
+User.getUserSession = async (req, res) => {
+  // res.send({ user: req.session.user });
+  res.send({ user: { name: "John Doe", user_id: 12 } });
+};
+
 module.exports = User;
