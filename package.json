@@ -33,7 +33,9 @@
     "npm": "^9.6.5",
     "pg": "^8.10.0",
     "pg-promise": "^11.4.3",
-    "pug": "^3.0.2"
+    "pug": "^3.0.2",
+    "socket.io": "^4.6.1",
+    "socket.io-client": "^4.6.1"
   },
   "devDependencies": {
     "babel-loader": "^9.1.2",

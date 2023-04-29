@@ -1,7 +1,9 @@
+const { CHAT } = require("../sockets/constants.js");
 const Lobby = {};
 
 Lobby.sendMessageLobby = (req, res) => {
-  const { message, user_id, username } = req.body;
+  const { message, user_id, username, game_id } = req.body;
+  const io = req.app.get("io");
 
   if (!user_id || !username) {
     res.send({ message: "Bad Request", status: 400 });
@@ -14,6 +16,7 @@ Lobby.sendMessageLobby = (req, res) => {
   }
   // insert info into db
 
+  io.in(game_id).emit(CHAT, { message, username });
   res.send({ message: message, username: username, status: 200 });
 };
 

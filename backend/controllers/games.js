@@ -1,7 +1,9 @@
+const { CHAT, CREATE_GAME } = require("../sockets/constants.js");
 const Game = {};
 
 Game.createGame = async (req, res) => {
   const { gametitle, count, user_id } = req.body;
+  const io = req.app.get("io");
 
   if (!user_id) {
     res.send({ message: "Bad Request", status: 400 });
@@ -15,9 +17,11 @@ Game.createGame = async (req, res) => {
 
   // Insert info into db
   // use db column id as game id
+  const game_id = 1;
 
+  io.emit(CREATE_GAME, { gametitle, count, user_id, game_id });
   res.send({
-    game_id: 1,
+    game_id: game_id,
     gametitle: gametitle,
     player_count: count,
     user_id: user_id,
@@ -46,7 +50,8 @@ Game.callUno = async (req, res) => {
 };
 
 Game.sendMessage = async (req, res) => {
-  const { message, user_id, username } = req.body;
+  const { message, user_id, username, game_id } = req.body;
+  const io = req.app.get("io");
 
   if (!user_id || !username) {
     res.send({ message: "Bad Request", status: 400 });
@@ -59,6 +64,7 @@ Game.sendMessage = async (req, res) => {
   }
   // insert info into db
 
+  io.in(game_id).emit(CHAT, { message, username });
   res.send({ message: message, username: username, status: 200 });
 };
 

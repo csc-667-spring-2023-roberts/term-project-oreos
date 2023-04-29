@@ -3,6 +3,7 @@ const createError = require("http-errors");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const testRoutes = require("./backend/routes/test/index.js");
+const initSockets = require("./backend/sockets/initialize.js");
 
 const express = require("express");
 const session = require("express-session");
@@ -16,14 +17,16 @@ const authenticationRoutes = require("./backend/routes/static/authentication.js"
 const users = require("./backend/routes/users.js");
 const games = require("./backend/routes/games.js");
 
-// const sessionMiddleware = session({
-//   secret: process.env.SECRET,
-//   resave: false,
-//   saveUninitialized: false,
-//   cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
-// });
+const sessionMiddleware = session({
+  secret: process.env.SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
+});
 
-// app.use(sessionMiddleware);
+app.use(sessionMiddleware);
+const server = initSockets(app, sessionMiddleware);
+
 app.use("/test", testRoutes);
 app.use(morgan("dev"));
 app.use(express.json());
@@ -42,7 +45,7 @@ app.use("/api/games", games);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server started on port ${PORT}`);
 });
 

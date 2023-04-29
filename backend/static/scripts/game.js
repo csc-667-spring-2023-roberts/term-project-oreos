@@ -8,15 +8,15 @@ const getUserSession = async () => {
   }
 };
 
-const getGameSession = async () => {
-  try {
-    const res = await fetch("/api/games/game-session");
-    const data = await res.json();
-    return data.game;
-  } catch (err) {
-    console.log(err);
+function getGameId(location) {
+  const gameId = location.substring(location.lastIndexOf("/") + 1);
+
+  if (gameId === "lobby") {
+    return 0;
+  } else {
+    return parseInt(gameId);
   }
-};
+}
 
 const startGame = () => {
   //TODO implement
@@ -35,8 +35,8 @@ const sendMessage = async () => {
   const userSession = await getUserSession();
   formDataJson["user_id"] = userSession.user_id;
   formDataJson["username"] = userSession.name;
-  const gameSession = await getGameSession();
-  const game_id = gameSession.game_id;
+  const game_id = getGameId(document.location.pathname);
+  formDataJson["game_id"] = game_id;
 
   const options = {
     method: "POST",
@@ -54,12 +54,6 @@ const sendMessage = async () => {
       alert(data.message);
       return;
     }
-
-    let chatList = document.getElementById("chat-list-id");
-    let li = document.createElement("li");
-    const { message, username } = data;
-    li.innerHTML = `${username}: ${message}`;
-    chatList.appendChild(li);
   } catch (err) {
     console.log(err);
   }
