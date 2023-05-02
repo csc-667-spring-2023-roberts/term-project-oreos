@@ -1,0 +1,14 @@
+extend layout 
+
+
+block content 
+    head 
+        script(src='/scripts/waitingroom.js', defer)
+
+    h1 Waiting Room #{id} (Authenticated)
+    h3(id="num-of-players-id") 
+    input(type='button' value='Start' onclick="checkPlayerCount()")  
+
+    
+
+

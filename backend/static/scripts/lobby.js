@@ -1,3 +1,11 @@
+const showMessage = (data) => {
+  document.getElementById("msg-id").innerText = data.message;
+
+  setTimeout(() => {
+    document.getElementById("msg-id").innerText = "";
+  }, 5000);
+};
+
 const getUserSession = async () => {
   try {
     const res = await fetch("/api/users/user-session");
@@ -8,7 +16,7 @@ const getUserSession = async () => {
   }
 };
 
-function getGameId(location) {
+const getGameId = (location) => {
   const gameId = location.substring(location.lastIndexOf("/") + 1);
 
   if (gameId === "lobby") {
@@ -16,7 +24,7 @@ function getGameId(location) {
   } else {
     return parseInt(gameId);
   }
-}
+};
 
 const createGame = async () => {
   const form = document.getElementById("create-game-form-id");
@@ -43,7 +51,7 @@ const createGame = async () => {
     const data = await res.json();
 
     if (data.status === 400) {
-      alert(data.message);
+      showMessage(data);
       return;
     }
   } catch (err) {
@@ -83,8 +91,8 @@ const sendMessage = async () => {
     const res = await fetch("/api/games/lobby-chat", options);
     const data = await res.json();
 
-    if (data.status === 400) {
-      alert(data.message);
+    if (data.status === 400 || data.status === 500) {
+      showMessage(data);
       return;
     }
   } catch (err) {

@@ -3,6 +3,14 @@ let deck = [];
 let discardPile = [];
 let players = [];
 
+const showMessage = (data) => {
+  document.getElementById("msg-id").innerText = data.message;
+
+  setTimeout(() => {
+    document.getElementById("msg-id").innerText = "";
+  }, 5000);
+};
+
 const getUserSession = async () => {
   try {
     const res = await fetch("/api/users/user-session");
@@ -13,7 +21,7 @@ const getUserSession = async () => {
   }
 };
 
-function getGameId(location) {
+const getGameId = (location) => {
   const gameId = location.substring(location.lastIndexOf("/") + 1);
 
   if (gameId === "lobby") {
@@ -21,7 +29,7 @@ function getGameId(location) {
   } else {
     return parseInt(gameId);
   }
-}
+};
 
 const initCards = async () => {
   const formDataJson = {};
@@ -42,12 +50,15 @@ const initCards = async () => {
     const data = await res.json();
     players = data.players;
 
-    if (data.status === 400) {
+    if (data.status === 400 || data.status === 500) {
+      showMessage(data);
       return;
     }
   } catch (err) {
     console.log(err);
   }
+
+  startGame();
 };
 
 const startGame = () => {
@@ -105,8 +116,8 @@ const sendMessage = async () => {
     const res = await fetch(`/api/games/${game_id}/chat`, options);
     const data = await res.json();
 
-    if (data.status === 400) {
-      alert(data.message);
+    if (data.status === 400 || data.status === 500) {
+      showMessage(data);
       return;
     }
   } catch (err) {
@@ -146,5 +157,4 @@ const endGame = () => {
 
 setTimeout(async () => {
   await initCards();
-  startGame();
 }, 1000);

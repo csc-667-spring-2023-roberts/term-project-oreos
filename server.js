@@ -13,9 +13,11 @@ require("dotenv").config();
 const homeRoutes = require("./backend/routes/static/home.js");
 const gamesRoutes = require("./backend/routes/static/games.js");
 const lobbyRoutes = require("./backend/routes/static/lobby.js");
+const waitingroomRoutes = require("./backend/routes/static/waitingroom.js");
 const authenticationRoutes = require("./backend/routes/static/authentication.js");
 const users = require("./backend/routes/users.js");
 const games = require("./backend/routes/games.js");
+const waitingroom = require("./backend/routes/waitingroom.js");
 
 const sessionMiddleware = session({
   secret: process.env.SECRET,
@@ -37,12 +39,13 @@ app.set("view engine", "pug");
 app.use(express.static(path.join(__dirname, "backend", "static")));
 
 app.use("/", homeRoutes);
+app.use("/waitingroom", waitingroomRoutes);
 app.use("/games", gamesRoutes);
 app.use("/lobby", lobbyRoutes);
 app.use("/authentication", authenticationRoutes);
 app.use("/api/users", users);
 app.use("/api/games", games);
-
+app.use("/api/waitingroom", waitingroom);
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {

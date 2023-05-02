@@ -76,6 +76,12 @@ Game.startGame = async (req, res) => {
   const { game_id } = req.body;
 
   const io = req.app.get("io");
+
+  if (!io.sockets.adapter.rooms.get(+game_id)) {
+    res.send({ message: "An error occured", status: 500 });
+    return;
+  }
+
   const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
 
   if (numPlayers < 2) {
