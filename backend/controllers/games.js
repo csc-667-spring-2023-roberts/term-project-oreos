@@ -1,5 +1,44 @@
-const { CHAT, CREATE_GAME } = require("../sockets/constants.js");
+const { CHAT, CREATE_GAME, START_GAME } = require("../sockets/constants.js");
+const fs = require("fs");
+const path = require("path");
 const Game = {};
+
+let deck = [];
+let discardPile = [];
+
+const emptyCards = () => {
+  deck = [];
+  discardPile = [];
+};
+
+const shuffleCards = (cards) => {
+  let temp = null;
+  for (let i = cards.length - 1; i > 0; i = -1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    temp = cards[i];
+    cards[i] = cards[j];
+    cards[j] = temp;
+  }
+
+  return cards;
+};
+const getCards = () => {
+  const folderPath = path.join(__dirname, "..", "static", "images");
+  const cards = [];
+
+  return new Promise((resolve, reject) => {
+    fs.readdir(folderPath, (err, files) => {
+      if (err) {
+        reject(err);
+      } else {
+        files.forEach((file) => {
+          cards.push(file);
+        });
+        resolve(cards);
+      }
+    });
+  });
+};
 
 Game.createGame = async (req, res) => {
   const { gametitle, count, user_id } = req.body;
@@ -30,8 +69,55 @@ Game.createGame = async (req, res) => {
 };
 
 Game.startGame = async (req, res) => {
-  // TODO implement
-  res.send({ message: "Game started" });
+  emptyCards();
+
+  // check if game already started by checking db if so then skip card setup
+
+  const { game_id } = req.body;
+
+  const io = req.app.get("io");
+  const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
+
+  if (numPlayers < 2) {
+    res.send({ message: "Need at least two players", status: 400 });
+    return;
+  }
+
+  let cards = await getCards();
+
+  cards = shuffleCards(cards);
+
+  for (let i = 0; i < cards.length; i++) {
+    if (cards[i] === "back.png") {
+      continue;
+    }
+
+    deck.push(cards[i]);
+  }
+
+  //TODO get players from db
+  const players = [
+    { name: "John", hand: [], user_id: 1 },
+    { name: "Bob", hand: [], user_id: 2 },
+    { name: "Tom", hand: [], user_id: 3 },
+  ];
+
+  const cardsInHand = 7;
+  for (let i = 0; i < numPlayers; i++) {
+    for (let j = 0; j < cardsInHand; j++) {
+      players[i].hand.push(deck.pop());
+    }
+  }
+
+  discardPile.push(deck.pop());
+  io.in(game_id).emit(START_GAME, { deck, discardPile, game_id });
+  res.send({
+    message: "Game started",
+    discardPile: discardPile,
+    deck: deck,
+    players: players,
+    status: 200,
+  });
 };
 
 Game.endGame = async (req, res) => {
