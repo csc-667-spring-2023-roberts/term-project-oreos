@@ -65,25 +65,33 @@ const startGame = () => {
   const imgPath = "../images/";
 
   players.forEach((player) => {
-    const playerDiv = document.createElement("div");
+    const playerHand = document.createElement("div");
+    playerHand.id = "player-hand-id";
     const playerTitle = document.createElement("p");
 
     // get player id from session
     if (player.user_id === 1) {
       playerTitle.innerText = player.name;
 
-      player.hand.forEach((card) => {
+      player.hand.forEach((card, idx) => {
         const cardImage = document.createElement("img");
         cardImage.setAttribute("src", `${imgPath}${card}`);
         cardImage.setAttribute("class", `${player.name}`);
         cardImage.setAttribute("width", "100px");
         cardImage.setAttribute("height", "100px");
-        playerDiv.appendChild(cardImage);
+
+        cardImage.addEventListener("click", () => {
+          // Do something when the image is clicked
+          console.log("Card played:" + card);
+          playCard(cardImage, card, idx);
+        });
+
+        playerHand.appendChild(cardImage);
       });
     }
 
-    document.getElementById("player-hand-id").appendChild(playerTitle);
-    document.getElementById("player-hand-id").appendChild(playerDiv);
+    document.getElementById("player-hand-parent-id").appendChild(playerTitle);
+    document.getElementById("player-hand-parent-id").appendChild(playerHand);
   });
 
   console.log("init and started game");
@@ -125,9 +133,23 @@ const sendMessage = async () => {
   }
 };
 
-const playCard = () => {
-  //TODO implement
-  console.log("card played");
+const playCard = (cardImage, cardName, idx) => {
+  // get player from db
+  // make sure user is in the game
+  // make sure player turn
+  const player = players[1];
+
+  player.hand.splice(idx, 1);
+
+  discardPile.push(cardName);
+  console.log(player.name + "player hand len: " + player.hand.length);
+
+  //update in sockets
+  const imgPath = "../images/";
+  const playerHand = document.getElementById("player-hand-id");
+  playerHand.removeChild(cardImage);
+  document.getElementById("discard-img-id").src =
+    imgPath + discardPile[discardPile.length - 1];
 };
 
 const drawCard = () => {
