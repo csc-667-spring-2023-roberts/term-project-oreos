@@ -21,6 +21,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/core": "^7.21.8",
     "babel-loader": "^9.1.2",
     "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.6",
