@@ -13,7 +13,7 @@ const emptyCards = () => {
 
 const shuffleCards = (cards) => {
   let temp = null;
-  for (let i = cards.length - 1; i > 0; i = -1) {
+  for (let i = cards.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
     temp = cards[i];
     cards[i] = cards[j];
