@@ -21,6 +21,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "babel-loader": "^9.1.2",
     "bcrypt": "^5.1.0",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.3",
@@ -40,7 +41,6 @@
     "webpack-cli": "^5.0.2"
   },
   "devDependencies": {
-    "babel-loader": "^9.1.2",
     "concurrently": "^8.0.1",
     "connect-livereload": "^0.6.1",
     "husky": "^8.0.3",
