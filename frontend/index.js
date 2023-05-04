@@ -7,6 +7,7 @@ import {
   CREATE_GAME,
   START_GAME,
   REDIRECT_TO_GAME_ROOM,
+  PLAY_CARD,
 } from "./constants";
 
 const socket = io();
@@ -72,4 +73,10 @@ socket.on(JOIN_GAME, ({ message, numPlayers }) => {
     document.getElementById("num-of-players-id").innerText =
       "Number of Players: " + numPlayers;
   }
+});
+
+socket.on(PLAY_CARD, ({ card_id, game_id, user_id, discardPile }) => {
+  const imgPath = "../images/";
+  document.getElementById("discard-img-id").src =
+    imgPath + discardPile[discardPile.length - 1];
 });

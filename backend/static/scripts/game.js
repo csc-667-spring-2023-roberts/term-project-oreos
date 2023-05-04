@@ -1,7 +1,4 @@
-let cards = [];
-let deck = [];
-let discardPile = [];
-let players = [];
+let playerInfo = [];
 
 const showMessage = (data) => {
   document.getElementById("msg-id").innerText = data.message;
@@ -48,7 +45,7 @@ const initCards = async () => {
   try {
     const res = await fetch(`/api/games/${game_id}/start`, options);
     const data = await res.json();
-    players = data.players;
+    playerInfo = data.playerInfo;
 
     if (data.status === 400 || data.status === 500) {
       showMessage(data);
@@ -64,36 +61,31 @@ const initCards = async () => {
 const startGame = () => {
   const imgPath = "../images/";
 
-  players.forEach((player) => {
-    const playerHand = document.createElement("div");
-    playerHand.id = "player-hand-id";
-    const playerTitle = document.createElement("p");
+  const playerHandUI = document.createElement("div");
+  playerHandUI.id = "player-hand-id";
+  const playerTitle = document.createElement("p");
 
-    // get player id from session
-    if (player.user_id === 1) {
-      playerTitle.innerText = player.name;
+  playerTitle.innerText = playerInfo.name;
 
-      player.hand.forEach((card, idx) => {
-        const cardImage = document.createElement("img");
-        cardImage.setAttribute("src", `${imgPath}${card}`);
-        cardImage.setAttribute("class", `${player.name}`);
-        cardImage.setAttribute("width", "100px");
-        cardImage.setAttribute("height", "100px");
+  playerInfo.hand.forEach((card) => {
+    const cardImage = document.createElement("img");
+    cardImage.id = card + "-id";
+    cardImage.setAttribute("src", `${imgPath}${card}`);
+    cardImage.setAttribute("class", `${playerInfo.name}`);
+    cardImage.setAttribute("width", "100px");
+    cardImage.setAttribute("height", "100px");
 
-        cardImage.addEventListener("click", () => {
-          // Do something when the image is clicked
-          console.log("Card played:" + card);
-          playCard(cardImage, card, idx);
-        });
+    cardImage.addEventListener("click", async () => {
+      console.log("Card played:" + card);
 
-        playerHand.appendChild(cardImage);
-      });
-    }
+      await playCard(cardImage, card);
+    });
 
-    document.getElementById("player-hand-parent-id").appendChild(playerTitle);
-    document.getElementById("player-hand-parent-id").appendChild(playerHand);
+    playerHandUI.appendChild(cardImage);
   });
 
+  document.getElementById("player-hand-parent-id").appendChild(playerTitle);
+  document.getElementById("player-hand-parent-id").appendChild(playerHandUI);
   console.log("init and started game");
 };
 
@@ -133,23 +125,37 @@ const sendMessage = async () => {
   }
 };
 
-const playCard = (cardImage, cardName, idx) => {
-  // get player from db
-  // make sure user is in the game
-  // make sure player turn
-  const player = players[1];
+const playCard = async (cardImage, cardName) => {
+  const formDataJson = {};
 
-  player.hand.splice(idx, 1);
+  const game_id = getGameId(document.location.pathname);
+  formDataJson["game_id"] = game_id;
+  formDataJson["user_id"] = 1;
+  formDataJson["card_id"] = cardName;
 
-  discardPile.push(cardName);
-  console.log(player.name + "player hand len: " + player.hand.length);
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formDataJson),
+  };
 
-  //update in sockets
-  const imgPath = "../images/";
-  const playerHand = document.getElementById("player-hand-id");
-  playerHand.removeChild(cardImage);
-  document.getElementById("discard-img-id").src =
-    imgPath + discardPile[discardPile.length - 1];
+  try {
+    const res = await fetch(`/api/games/${game_id}/play`, options);
+    const data = await res.json();
+    playerInfo = data.playerInfo;
+
+    if (data.status === 400 || data.status === 500) {
+      showMessage(data);
+      return;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+
+  const cardUI = document.getElementById(cardName + "-id");
+  cardUI.remove();
 };
 
 const drawCard = () => {
