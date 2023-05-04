@@ -11,9 +11,11 @@ const Game = {};
 let deck = [];
 let discardPile = [];
 let players = [];
+let opponents = [];
 
 const emptyCards = () => {
   deck = [];
+  opponents = [];
   discardPile = [];
 };
 
@@ -74,12 +76,17 @@ Game.createGame = async (req, res) => {
   });
 };
 
+const joinOnGoingGame = (user_id) => {};
+
 Game.startGame = async (req, res) => {
   emptyCards();
 
   // check if game already started by checking db if so then skip card setup
+  // if player is joining current game then setup only their hand
 
+  const user_id = 1;
   const { game_id } = req.body;
+  joinOnGoingGame();
 
   const io = req.app.get("io");
 
@@ -109,20 +116,24 @@ Game.startGame = async (req, res) => {
 
   //TODO get players from db
   players = [
-    { name: "John", hand: [], user_id: 1 },
+    { name: "Tom", hand: [], user_id: 1 },
     { name: "Bob", hand: [], user_id: 2 },
-    { name: "Tom", hand: [], user_id: 3 },
   ];
 
   const cardsInHand = 7;
   for (let i = 0; i < numPlayers; i++) {
+    if (user_id !== players[i].user_id) {
+      opponents.push({
+        name: players[i].name,
+        hand: new Array(7).fill("back.png"),
+        user_id: players[i].user_id,
+      });
+    }
     for (let j = 0; j < cardsInHand; j++) {
       players[i].hand.push(deck.pop());
     }
   }
 
-  //get user session id
-  const user_id = 1;
   let playerInfo = [];
   for (let i = 0; i < players.length; i++) {
     if (user_id === players[i].user_id) {
@@ -131,13 +142,15 @@ Game.startGame = async (req, res) => {
   }
 
   discardPile.push(deck.pop());
-  io.in(game_id).emit(START_GAME, { deck, discardPile, game_id });
+
+  io.in(game_id).emit(START_GAME, { deck, discardPile, game_id, opponents });
   res.send({
     message: "Game started",
     discardPile: discardPile,
     deck: deck,
     playersCount: numPlayers,
     playerInfo: playerInfo,
+    opponents: opponents,
     status: 200,
   });
 };

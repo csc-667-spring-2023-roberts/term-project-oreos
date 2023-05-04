@@ -1,4 +1,5 @@
 let playerInfo = [];
+let opponents = [];
 
 const showMessage = (data) => {
   document.getElementById("msg-id").innerText = data.message;
@@ -46,6 +47,7 @@ const initCards = async () => {
     const res = await fetch(`/api/games/${game_id}/start`, options);
     const data = await res.json();
     playerInfo = data.playerInfo;
+    opponents = data.opponents;
 
     if (data.status === 400 || data.status === 500) {
       showMessage(data);
@@ -86,6 +88,31 @@ const startGame = () => {
 
   document.getElementById("player-hand-parent-id").appendChild(playerTitle);
   document.getElementById("player-hand-parent-id").appendChild(playerHandUI);
+
+  opponents.forEach((opponent) => {
+    const opponentHandUI = document.createElement("div");
+    opponentHandUI.id = "opponent-hand-id";
+    const playerTitle = document.createElement("p");
+
+    playerTitle.innerText = opponent.name;
+
+    opponent.hand.forEach((card) => {
+      const cardImage = document.createElement("img");
+      cardImage.id = card + "-id";
+      cardImage.setAttribute("src", `${imgPath}${card}`);
+      cardImage.setAttribute("class", `${opponent.name}`);
+      cardImage.setAttribute("width", "100px");
+      cardImage.setAttribute("height", "100px");
+      opponentHandUI.appendChild(cardImage);
+    });
+
+    document
+      .getElementById("opponents-hand-parent-id")
+      .appendChild(playerTitle);
+    document
+      .getElementById("opponents-hand-parent-id")
+      .appendChild(opponentHandUI);
+  });
   console.log("init and started game");
 };
 
