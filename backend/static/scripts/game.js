@@ -1,5 +1,6 @@
 let playerInfo = [];
 let opponents = [];
+const imgPath = "../images/";
 
 const showMessage = (data) => {
   document.getElementById("msg-id").innerText = data.message;
@@ -60,9 +61,7 @@ const initCards = async () => {
   startGame();
 };
 
-const startGame = () => {
-  const imgPath = "../images/";
-
+const addCardsToPlayerHand = () => {
   const playerHandUI = document.createElement("div");
   playerHandUI.id = "player-hand-id";
   const playerTitle = document.createElement("p");
@@ -80,7 +79,7 @@ const startGame = () => {
     cardImage.addEventListener("click", async () => {
       console.log("Card played:" + card);
 
-      await playCard(cardImage, card);
+      await playCard(card);
     });
 
     playerHandUI.appendChild(cardImage);
@@ -88,7 +87,9 @@ const startGame = () => {
 
   document.getElementById("player-hand-parent-id").appendChild(playerTitle);
   document.getElementById("player-hand-parent-id").appendChild(playerHandUI);
+};
 
+const addCardsToOpponentHand = () => {
   opponents.forEach((opponent) => {
     const opponentHandUI = document.createElement("div");
     opponentHandUI.id = "opponent-hand-id";
@@ -113,6 +114,11 @@ const startGame = () => {
       .getElementById("opponents-hand-parent-id")
       .appendChild(opponentHandUI);
   });
+};
+
+const startGame = () => {
+  addCardsToPlayerHand(playerInfo);
+  addCardsToOpponentHand();
   console.log("init and started game");
 };
 
@@ -152,7 +158,7 @@ const sendMessage = async () => {
   }
 };
 
-const playCard = async (cardImage, cardName) => {
+const playCard = async (cardName) => {
   const formDataJson = {};
 
   const game_id = getGameId(document.location.pathname);
@@ -185,9 +191,54 @@ const playCard = async (cardImage, cardName) => {
   cardUI.remove();
 };
 
-const drawCard = () => {
-  //TODO implement
-  console.log("card drawn");
+const drawCard = async () => {
+  const formDataJson = {};
+
+  formDataJson["user_id"] = 1;
+  const game_id = getGameId(document.location.pathname);
+  formDataJson["game_id"] = game_id;
+
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formDataJson),
+  };
+
+  try {
+    const res = await fetch(`/api/games/${game_id}/draw`, options);
+    const data = await res.json();
+
+    let playerInfoNewCards = data.playerInfoNewCards;
+    playerInfo = data.playerInfo;
+
+    const playerHandUI = document.getElementById("player-hand-id");
+
+    playerInfoNewCards.hand.forEach((card) => {
+      const cardImage = document.createElement("img");
+      cardImage.id = card + "-id";
+      cardImage.setAttribute("src", `${imgPath}${card}`);
+      cardImage.setAttribute("class", `${playerInfoNewCards.name}`);
+      cardImage.setAttribute("width", "100px");
+      cardImage.setAttribute("height", "100px");
+
+      cardImage.addEventListener("click", async () => {
+        console.log("Card played:" + card);
+
+        await playCard(card);
+      });
+
+      playerHandUI.appendChild(cardImage);
+
+      if (data.status === 400 || data.status === 500) {
+        showMessage(data);
+        return;
+      }
+    });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const callUno = () => {

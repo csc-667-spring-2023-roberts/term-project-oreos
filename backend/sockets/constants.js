@@ -4,6 +4,7 @@ const CREATE_GAME = "create-game";
 const START_GAME = "start-game";
 const REDIRECT_TO_GAME_ROOM = "redirect-to-game-room";
 const PLAY_CARD = "play-card";
+const DRAW_CARD = "draw-card";
 
 module.exports = {
   CHAT,
@@ -12,4 +13,5 @@ module.exports = {
   START_GAME,
   REDIRECT_TO_GAME_ROOM,
   PLAY_CARD,
+  DRAW_CARD,
 };

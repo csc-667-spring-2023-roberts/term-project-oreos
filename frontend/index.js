@@ -8,13 +8,15 @@ import {
   START_GAME,
   REDIRECT_TO_GAME_ROOM,
   PLAY_CARD,
+  DRAW_CARD,
 } from "./constants";
 
 const socket = io();
 const game_id = getGameId(document.location.pathname);
+
 // TODO get user from session
 const user = {
-  name: "Jon",
+  name: "Tom",
   user_id: 1,
 };
 
@@ -79,4 +81,9 @@ socket.on(PLAY_CARD, ({ card_id, game_id, user_id, discardPile }) => {
   const imgPath = "../images/";
   document.getElementById("discard-img-id").src =
     imgPath + discardPile[discardPile.length - 1];
+});
+
+socket.on(DRAW_CARD, ({ card_id, game_id, user_id, discardPile, deck }) => {
+  const imgPath = "../images/";
+  document.getElementById("deck-img-id").src = imgPath + deck[deck.length - 1];
 });
