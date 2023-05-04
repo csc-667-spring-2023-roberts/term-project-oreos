@@ -16,6 +16,17 @@ const getGameId = (location) => {
   }
 };
 
+const isOnGoingGame = () => {
+  // get game session to see if it is ongoing
+  // if so then redirect joining player to that game
+  let isOnGoing = false;
+
+  if (isOnGoing) {
+    const game_id = getGameId(document.location.pathname);
+    window.location.href = `/games/${game_id}`;
+  }
+};
+
 const checkPlayerCount = async () => {
   const game_id = getGameId(document.location.pathname);
 
@@ -31,3 +42,5 @@ const checkPlayerCount = async () => {
     console.log(err);
   }
 };
+
+isOnGoingGame();

@@ -18,8 +18,13 @@ block content
   div(class='discard-pile')
     h3 Discard Pile
     img(id="discard-img-id" src='', alt='Discard Pile' height="100px" width="100px")
+  
   div(id='player-hand-parent-id')
+    input(type='button' value='Draw' onclick="drawCard()")  
     h3 Player:
+  div(id='opponents-hand-parent-id')
+    h3 Opponents: 
+
 
   h1 Chat
   ul(id="chat-list-id")
