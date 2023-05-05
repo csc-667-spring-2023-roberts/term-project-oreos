@@ -2,16 +2,20 @@ extend layout
 
 block content
   head 
+    link(rel='stylesheet' href='/stylesheets/game.css')
     script(src='/scripts/game.js', defer)
   h1 Game #{id} Page (Authenticated)
+
+
 
   form(id="send-chat-form-id" onsubmit="sendMessage(); return false;")
     em Message
     input(type='text' name="message" required)
     input(type='submit' value='Send')  
 
-  
+
   h3(id="num-of-players-id") Number of Players: 1
+
   div(class='deck')
     h3 Deck
     img(id="deck-img-id" src='', alt='Deck' height="100px" width="100px")
@@ -19,13 +23,17 @@ block content
     h3 Discard Pile
     img(id="discard-img-id" src='', alt='Discard Pile' height="100px" width="100px")
   
-  div(id='player-hand-parent-id')
-    input(type='button' value='Draw' onclick="drawCard()")  
-    h3 Player:
-  div(id='opponents-hand-parent-id')
-    h3 Opponents: 
+  input(class="draw-btn" type='button' value='Draw' onclick="drawCard()")  
+  div(class="container")
+    div(class="game-cards-container")
+      h1 Hands
+      div(class="game-cards")
+        div(id='player-hand-parent-id')
+          h3 Player:
+        div(id='opponents-hand-parent-id')
+          h3 Opponents: 
 
-
-  h1 Chat
-  ul(id="chat-list-id")
+    div(class="chat-list-container")
+      h1 Chat
+      ul(class="chat-list" id="chat-list-id")
 
