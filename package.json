@@ -11,7 +11,6 @@
     "server:dev:windows": "set NODE_ENV=development && nodemon -e js,pug --watch backend ./server.js",
     "build": "webpack",
     "build:dev": "webpack --watch",
-    "prepare": "husky install",
     "db:create": "node-pg-migrate create -- ",
     "db:migrate": "node-pg-migrate up",
     "db:rollback": "node-pg-migrate down",
