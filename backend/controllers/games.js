@@ -1,13 +1,22 @@
-const { CHAT, CREATE_GAME, START_GAME } = require("../sockets/constants.js");
+const {
+  CHAT,
+  CREATE_GAME,
+  START_GAME,
+  PLAY_CARD,
+  DRAW_CARD,
+} = require("../sockets/constants.js");
 const fs = require("fs");
 const path = require("path");
 const Game = {};
 
 let deck = [];
 let discardPile = [];
+let players = [];
+let opponents = [];
 
 const emptyCards = () => {
   deck = [];
+  opponents = [];
   discardPile = [];
 };
 
@@ -72,7 +81,9 @@ Game.startGame = async (req, res) => {
   emptyCards();
 
   // check if game already started by checking db if so then skip card setup
+  // if player is joining current game then setup only their hand
 
+  const user_id = 1;
   const { game_id } = req.body;
 
   const io = req.app.get("io");
@@ -102,26 +113,42 @@ Game.startGame = async (req, res) => {
   }
 
   //TODO get players from db
-  const players = [
-    { name: "John", hand: [], user_id: 1 },
+  players = [
+    { name: "Tom", hand: [], user_id: 1 },
     { name: "Bob", hand: [], user_id: 2 },
-    { name: "Tom", hand: [], user_id: 3 },
   ];
 
   const cardsInHand = 7;
   for (let i = 0; i < numPlayers; i++) {
+    if (user_id !== players[i].user_id) {
+      opponents.push({
+        name: players[i].name,
+        hand: new Array(7).fill("back.png"),
+        user_id: players[i].user_id,
+      });
+    }
     for (let j = 0; j < cardsInHand; j++) {
       players[i].hand.push(deck.pop());
     }
   }
 
+  let playerInfo = [];
+  for (let i = 0; i < players.length; i++) {
+    if (user_id === players[i].user_id) {
+      playerInfo = players[i];
+    }
+  }
+
   discardPile.push(deck.pop());
-  io.in(game_id).emit(START_GAME, { deck, discardPile, game_id });
+
+  io.in(game_id).emit(START_GAME, { deck, discardPile, game_id, opponents });
   res.send({
     message: "Game started",
     discardPile: discardPile,
     deck: deck,
-    players: players,
+    playersCount: numPlayers,
+    playerInfo: playerInfo,
+    opponents: opponents,
     status: 200,
   });
 };
@@ -132,8 +159,84 @@ Game.endGame = async (req, res) => {
 };
 
 Game.playCard = async (req, res) => {
-  // TODO implement
-  res.send({ message: "Play card" });
+  // get player from db
+  // make sure user is in the game
+  // make sure player turn
+
+  const { game_id, user_id, card_id } = req.body;
+  const io = req.app.get("io");
+
+  let playerInfo = [];
+
+  for (let i = 0; i < players.length; i++) {
+    if (user_id === players[i].user_id) {
+      let idx = Array.from(players[i].hand.indexOf(card_id));
+      players[i].hand.splice(idx, 1);
+      playerInfo = players[i];
+      break;
+    }
+  }
+
+  discardPile.push(card_id);
+  io.in(game_id).emit(PLAY_CARD, { card_id, game_id, user_id, discardPile });
+  res.send({
+    message: "Played card: " + card_id,
+    playerInfo: playerInfo,
+    status: 200,
+  });
+};
+
+Game.drawCard = (req, res) => {
+  const { game_id, user_id } = req.body;
+  const io = req.app.get("io");
+
+  // get current player's turn from db
+  let playerInfo = {};
+  let playerInfoNewCards = {};
+
+  for (let i = 0; i < players.length; i++) {
+    if (user_id === players[i].user_id) {
+      playerInfo = players[i];
+      playerInfoNewCards = {
+        name: players[i].name,
+        hand: [],
+        user_id: players[i].user_id,
+      };
+      break;
+    }
+  }
+
+  // penalty did not call uno
+  if (playerInfo.hand.length === 1) {
+    for (let i = 0; i < 2; i++) {
+      const card = deck.pop();
+      playerInfo.hand.push(card);
+      playerInfoNewCards.hand.push(card);
+    }
+
+    res.send({
+      message: "Drawn two cards",
+      playerInfo: playerInfo,
+      playerInfoNewCards: playerInfoNewCards,
+      numPlayerCards: playerInfo.hand.length,
+      status: 200,
+    });
+    return;
+  }
+
+  const card = deck.pop();
+  playerInfo.hand.push(card);
+  playerInfoNewCards.hand.push(card);
+
+  io.in(game_id).emit(DRAW_CARD, { game_id, user_id, discardPile, deck });
+
+  res.send({
+    message: "Drawn card: " + card,
+    playerInfo: playerInfo,
+    playerInfoNewCards: playerInfoNewCards,
+    numPlayerCards: playerInfo.hand.length,
+    status: 200,
+  });
 };
 
 Game.callUno = async (req, res) => {

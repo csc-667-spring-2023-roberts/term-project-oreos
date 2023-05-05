@@ -4,6 +4,7 @@ const {
   startGame,
   endGame,
   playCard,
+  drawCard,
   callUno,
   sendMessage,
   saveGameState,
@@ -20,6 +21,7 @@ router.post("/lobby-chat", sendMessageLobby);
 router.post("/:game_id/start", startGame);
 router.post("/:game_id/end", endGame);
 router.put("/:game_id/play", playCard);
+router.put("/:game_id/draw", drawCard);
 router.put("/:game_id/uno", callUno);
 router.post("/:game_id/chat", sendMessage);
 router.put("/:game_id/state", saveGameState);
