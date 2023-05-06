@@ -4,6 +4,7 @@ const {
   START_GAME,
   PLAY_CARD,
   DRAW_CARD,
+  CALL_UNO,
 } = require("../sockets/constants.js");
 const fs = require("fs");
 const path = require("path");
@@ -173,11 +174,11 @@ Game.playCard = async (req, res) => {
       let idx = Array.from(players[i].hand.indexOf(card_id));
       players[i].hand.splice(idx, 1);
       playerInfo = players[i];
-      break;
     }
   }
 
   discardPile.push(card_id);
+
   io.in(game_id).emit(PLAY_CARD, { card_id, game_id, user_id, discardPile });
   res.send({
     message: "Played card: " + card_id,
@@ -246,8 +247,21 @@ Game.drawCard = (req, res) => {
 };
 
 Game.callUno = async (req, res) => {
-  // TODO implement
-  res.send({ message: "Call Uno" });
+  const { game_id } = req.params;
+  const user_id = 1;
+  //const {user_id} = req.body
+  const io = req.app.get("io");
+
+  //validate user from db
+  const message = "Tom Called Uno";
+
+  if (!user_id || !game_id) {
+    res.send({ message: "Bad Request", status: 400 });
+    return;
+  }
+
+  io.in(+game_id).emit(CALL_UNO, { message });
+  res.send({ message: "Called Uno", status: 200 });
 };
 
 Game.sendMessage = async (req, res) => {

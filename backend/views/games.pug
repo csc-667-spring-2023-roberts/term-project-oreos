@@ -23,7 +23,11 @@ block content
     h3 Discard Pile
     img(id="discard-img-id" src='', alt='Discard Pile' height="100px" width="100px")
   
-  input(class="draw-btn" type='button' value='Draw' onclick="drawCard()")  
+  input(class="draw-btn" type='button' value='Draw' onclick="drawCard()")
+
+  div(class="call-uno-container" id="call-uno-container-id")
+    h3(id="call-uno-msg-id")
+
   div(class="container")
     div(class="game-cards-container")
       h1 Hands

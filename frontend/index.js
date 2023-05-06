@@ -9,6 +9,7 @@ import {
   REDIRECT_TO_GAME_ROOM,
   PLAY_CARD,
   DRAW_CARD,
+  CALL_UNO,
 } from "./constants";
 
 const socket = io();
@@ -86,4 +87,12 @@ socket.on(PLAY_CARD, ({ card_id, game_id, user_id, discardPile }) => {
 socket.on(DRAW_CARD, ({ card_id, game_id, user_id, discardPile, deck }) => {
   const imgPath = "../images/";
   document.getElementById("deck-img-id").src = imgPath + deck[deck.length - 1];
+});
+
+socket.on(CALL_UNO, ({ message }) => {
+  document.getElementById("call-uno-msg-id").innerText = message;
+
+  setTimeout(() => {
+    document.getElementById("call-uno-msg-id").innerText = "";
+  }, 5000);
 });
