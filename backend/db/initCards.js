@@ -1,4 +1,4 @@
-const db = require("./backend/db/connection.js");
+const db = require("./connection.js");
 
 const cards = [
   // template: { card_color: ?, card_number: ? }, 
