@@ -34,6 +34,10 @@ exports.up = (pgm) => {
       type: "boolean",
       notNull: true,
     },
+    turn: {
+      type: "integer",
+      notNull: true,
+    },
   });
 
   pgm.createTable("user_cards", {
@@ -55,6 +59,26 @@ exports.up = (pgm) => {
   pgm.createTable("games", {
     // From the docs, "id" is equivalent to: { type: 'serial', primaryKey: true }
     id: "id",
+    game_title: {
+      type: "varchar(255)",
+      notNull: true,
+    },
+    ongoing: {
+      type: "boolean",
+      notNull: true,
+    },
+    top_deck: {
+      type: "varchar(5)",
+      notNull: true,
+    },
+    top_discard: {
+      type: "varchar(5)",
+      notNull: true,
+    },
+    position: {
+      type: "integer",
+      notNull: true,
+    },
     created_at: {
       type: "timestamp",
       notNull: true,
