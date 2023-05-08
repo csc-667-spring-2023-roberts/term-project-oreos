@@ -142,15 +142,34 @@ exports.up = (pgm) => {
       default: pgm.func("current_timestamp"),
     },
   });
+
+  pgm.createTable("session", {
+    sid: {
+      type: "varchar",
+      notNull: true,
+      primaryKey: true,
+    },
+    sess: {
+      type: "json",
+      notNull: true,
+    },
+    expire: {
+      type: "timestamp(6)",
+      notNull: true,
+    },
+  });
+
+  pgm.createIndex("session", "expire");
 };
 
 exports.down = (pgm) => {
   //drop all tables
-  // pgm.dropTable("users");
-  // pgm.dropTable("game_users");
-  // pgm.dropTable("user_cards");
-  // pgm.dropTable("games");
-  // pgm.dropTable("cards");
-  // pgm.dropTable("lobby_messages");
-  // pgm.dropTable("game_room_messages");
+  pgm.dropTable("users");
+  pgm.dropTable("game_users");
+  pgm.dropTable("user_cards");
+  pgm.dropTable("games");
+  pgm.dropTable("cards");
+  pgm.dropTable("lobby_messages");
+  pgm.dropTable("game_room_messages");
+  pgm.dropTable("session");
 };
