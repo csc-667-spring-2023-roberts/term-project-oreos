@@ -1,11 +1,12 @@
 extends auth-layout
 
 block content
-
+  head 
+    script(src='/scripts/auth.js', defer)
   div.register
     div.register__container
       h1 LOGIN
-      form(method='post' action='/authnetication/register')
+      form(id="signin-form-id" onsubmit="signin(); return false;")
           label
           div.register__textBox
             em Username  

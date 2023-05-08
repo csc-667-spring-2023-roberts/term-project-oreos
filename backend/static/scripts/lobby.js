@@ -10,11 +10,14 @@ const getUserSession = async () => {
   try {
     const res = await fetch("/api/users/user-session");
     const data = await res.json();
+    console.log(data);
     return data.user;
   } catch (err) {
     console.log(err);
   }
 };
+
+getUserSession();
 
 const getGameId = (location) => {
   const gameId = location.substring(location.lastIndexOf("/") + 1);
@@ -36,7 +39,7 @@ const createGame = async () => {
   }
 
   const userSession = await getUserSession();
-  formDataJson["user_id"] = userSession.user_id;
+  formDataJson["user_id"] = userSession.id;
 
   const options = {
     method: "POST",
@@ -74,8 +77,8 @@ const sendMessage = async () => {
   }
 
   const userSession = await getUserSession();
-  formDataJson["user_id"] = userSession.user_id;
-  formDataJson["username"] = userSession.name;
+  formDataJson["user_id"] = userSession.id;
+  formDataJson["username"] = userSession.username;
   const game_id = getGameId(document.location.pathname);
   formDataJson["game_id"] = game_id;
 

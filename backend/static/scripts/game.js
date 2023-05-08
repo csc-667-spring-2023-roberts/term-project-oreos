@@ -132,8 +132,8 @@ const sendMessage = async () => {
   }
 
   const userSession = await getUserSession();
-  formDataJson["user_id"] = userSession.user_id;
-  formDataJson["username"] = userSession.name;
+  formDataJson["user_id"] = userSession.id;
+  formDataJson["username"] = userSession.username;
   const game_id = getGameId(document.location.pathname);
   formDataJson["game_id"] = game_id;
 

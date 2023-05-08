@@ -2,6 +2,8 @@ const Auth = {};
 
 Auth.isAuthenticated = (req, res, next) => {
   const { user } = req.session;
+  console.log("user auth");
+  console.log(user);
 
   if (user !== undefined && user.id !== undefined) {
     next();

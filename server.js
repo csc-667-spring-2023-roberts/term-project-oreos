@@ -7,6 +7,9 @@ const initSockets = require("./backend/sockets/initialize.js");
 
 const express = require("express");
 const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
+const addSessionLocals = require("./backend/middleware/add-session-locals.js");
+const db = require("./backend/db/connection.js");
 const app = express();
 require("dotenv").config();
 
@@ -20,6 +23,7 @@ const games = require("./backend/routes/games.js");
 const waitingroom = require("./backend/routes/waitingroom.js");
 
 const sessionMiddleware = session({
+  store: new pgSession({ pgPromise: db, createTableIfMissing: true }),
   secret: process.env.SECRET,
   resave: false,
   saveUninitialized: false,
@@ -37,6 +41,7 @@ app.use(cookieParser());
 app.set("views", path.join(__dirname, "backend", "views"));
 app.set("view engine", "pug");
 app.use(express.static(path.join(__dirname, "backend", "static")));
+app.use(addSessionLocals);
 
 app.use("/", homeRoutes);
 app.use("/waitingroom", waitingroomRoutes);

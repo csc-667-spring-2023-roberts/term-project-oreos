@@ -3,10 +3,15 @@ const { isAuthenticated } = require("../../middleware/auth.js");
 
 const router = express.Router();
 
-router.get("/:id", (_request, response) => {
+router.get("/:id", isAuthenticated, (_request, response) => {
+  const user = _request.session.user;
   const { id } = _request.params;
 
-  response.render("waitingroom", { id, title: "Term Project Oreos" });
+  response.render("waitingroom", {
+    id,
+    user: user,
+    title: "Term Project Oreos",
+  });
 });
 
 module.exports = router;
