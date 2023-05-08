@@ -1,19 +1,20 @@
 const bcrypt = require("bcrypt");
-const { use } = require("../routes/users");
+const Users = require("../db/users.js");
 
 const User = {};
 const SALT_ROUNDS = 10;
 
 User.signin = async (req, res) => {
-  console.log(req.body);
-  const { username, email, password } = req.body;
+  const { email, password } = req.body;
+  const oldUsername = req.body.username;
 
   try {
-    // TODO placeholder info, replace data retrieved from database
-
-    const id = 2;
-    //await Users.findByEmail(email);
-    const isValidUser = true; //await bcrypt.compare(password, hash);
+    const {
+      id,
+      username,
+      password: hash,
+    } = await Users.findByEmailOrUsername(email, oldUsername);
+    const isValidUser = await bcrypt.compare(password, hash);
 
     if (isValidUser) {
       req.session.user = {
@@ -24,16 +25,14 @@ User.signin = async (req, res) => {
 
       res.send({ url: "/lobby", status: 200 });
     } else {
-      res.send({ message: "Invalid credentials" });
+      res.send({ message: "Invalid credentials", status: 400 });
     }
   } catch (error) {
-    console.log({ error });
-    res.send({ message: "Error signing in" });
+    res.send({ message: "Error signing in", status: 500 });
   }
 };
 
 User.register = async (req, res) => {
-  console.log(req.body);
   const { username, email, password } = req.body;
 
   if (
@@ -52,20 +51,17 @@ User.register = async (req, res) => {
   const hash = await bcrypt.hash(password, salt);
 
   try {
-    // TODO replace with database data
-    const id = 1; //await Users.create(username, email, hash);
+    const id = await Users.create(username, email, hash);
+
     req.session.user = {
       id,
       username,
       email,
     };
 
-    console.log(req.session.user);
-
     res.send({ url: "/lobby", status: 200 });
   } catch (error) {
-    console.log({ error });
-    res.send({ message: "Error signing up", status: 400 });
+    res.send({ message: "Error signing up", status: 500 });
   }
 };
 

@@ -24,7 +24,7 @@ const waitingroom = require("./backend/routes/waitingroom.js");
 
 const sessionMiddleware = session({
   store: new pgSession({ pgPromise: db, createTableIfMissing: true }),
-  secret: process.env.SECRET,
+  secret: "sessionsecret123",
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },

@@ -28,7 +28,7 @@ const register = async () => {
     const data = await res.json();
 
     if (data.status === 400 || data.status === 500) {
-      showMessage(data);
+      showMessageAuth(data);
       return;
     }
 
