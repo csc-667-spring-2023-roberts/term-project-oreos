@@ -503,7 +503,7 @@
   "resolved" "https://registry.npmjs.org/@types/node/-/node-18.15.11.tgz"
   "version" "18.15.11"
 
-"@types/pg@^8.0.0":
+"@types/pg@^8.0.0", "@types/pg@^8.6.5":
   "integrity" "sha512-O2xNmXebtwVekJDD+02udOncjVcMZQuTEQEMpKJ0ZRf5E7/9JJX3izhKUcUifBkyKpljyUM6BTgy2trmviKlpw=="
   "resolved" "https://registry.npmjs.org/@types/pg/-/pg-8.6.6.tgz"
   "version" "8.6.6"
@@ -1326,6 +1326,14 @@
   "integrity" "sha512-3R0kMOdL7CjJpU66fzAkCe6HNtd3AavCS4m+uW4KtJjrdGPT0SQEZieAYd+cm+lJoBznNQ4lqipYWkhBMgk00g=="
   "resolved" "https://registry.npmjs.org/connect-livereload/-/connect-livereload-0.6.1.tgz"
   "version" "0.6.1"
+
+"connect-pg-simple@^8.0.0":
+  "integrity" "sha512-pBDa23RA1LCkwvRrPOh5xevB+Nknh1UDuhFOKsUrkUDodYqfiQT18P2qXc4lk/TqCMB6hI06B8KNncHh91bZMQ=="
+  "resolved" "https://registry.npmjs.org/connect-pg-simple/-/connect-pg-simple-8.0.0.tgz"
+  "version" "8.0.0"
+  dependencies:
+    "@types/pg" "^8.6.5"
+    "pg" "^8.8.0"
 
 "console-control-strings@^1.0.0", "console-control-strings@^1.1.0":
   "integrity" "sha512-ty/fTekppD2fIwRvnZAVdeOiGd1c7YXEixbgJTNzqcxJWKQnjJ/V1bNEEE6hygpM3WjwHFUVK6HTjWSzV4a8sQ=="
@@ -3315,7 +3323,7 @@
     "postgres-date" "~1.0.4"
     "postgres-interval" "^1.1.0"
 
-"pg@^8.10.0", "pg@>=4.3.0 <9.0.0", "pg@>=8.0", "pg@8.10.0":
+"pg@^8.10.0", "pg@^8.8.0", "pg@>=4.3.0 <9.0.0", "pg@>=8.0", "pg@8.10.0":
   "integrity" "sha512-ke7o7qSTMb47iwzOSaZMfeR7xToFdkE71ifIipOAAaLIM0DYzfOAXlgFFmYUIE2BcJtvnVlGCID84ZzCegE8CQ=="
   "resolved" "https://registry.npmjs.org/pg/-/pg-8.10.0.tgz"
   "version" "8.10.0"

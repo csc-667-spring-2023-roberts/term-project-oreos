@@ -1,15 +1,24 @@
-
+head
+   script(src='/scripts/auth.js', defer)
 ul.topnav
-    li  
-        a(href='/') UNO
-    li
-        a(href='/') Home
-    li
-        a(href='/lobby') Lobby
-    li
-        a(href='/games/42') Game - 42 
-    li.right
-        a(href='/authentication/login') Login
-    li.right
-        a(href='/authentication/register') Sign-up 
-    
+    if user_id
+        li  
+            a(href='/') UNO
+        li
+            a(href='/') Home
+        li
+            a(href='/lobby') Lobby
+        li
+            a(href='/games/42') Game - 42 
+        li.right
+            a(href='/' onclick="signout()") Sign-out
+    else
+        li  
+            a(href='/') UNO
+        li
+            a(href='/') Home
+        li.right
+            a(href='/authentication/login') Login
+        li.right
+            a(href='/authentication/register') Sign-up 
+        

@@ -3,8 +3,9 @@ const { isAuthenticated } = require("../../middleware/auth.js");
 
 const router = express.Router();
 
-router.get("/", (_request, response) => {
-  response.render("lobby", { title: "Term Project Oreos" });
+router.get("/", isAuthenticated, (_request, response) => {
+  const user_id = _request.session.user ? _request.session.user.id : "";
+  response.render("lobby", { user_id: user_id, title: "Term Project Oreos" });
 });
 
 module.exports = router;

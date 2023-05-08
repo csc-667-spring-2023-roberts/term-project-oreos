@@ -1,20 +1,20 @@
 const bcrypt = require("bcrypt");
+const Users = require("../db/users.js");
 
 const User = {};
 const SALT_ROUNDS = 10;
 
 User.signin = async (req, res) => {
-  console.log(req.body);
   const { email, password } = req.body;
+  const oldUsername = req.body.username;
 
   try {
-    // TODO placeholder info, replace data retrieved from database
     const {
       id,
       username,
       password: hash,
-    } = { id: 1, username: "TestUser", password: "hashedpassword" }; //await Users.findByEmail(email);
-    const isValidUser = true; //await bcrypt.compare(password, hash);
+    } = await Users.findByEmailOrUsername(email, oldUsername);
+    const isValidUser = await bcrypt.compare(password, hash);
 
     if (isValidUser) {
       req.session.user = {
@@ -23,60 +23,59 @@ User.signin = async (req, res) => {
         email,
       };
 
-      console.log(req.session);
-      res.redirect("/lobby");
+      res.send({ url: "/lobby", status: 200 });
     } else {
-      res.send({ message: "Invalid credentials" });
+      res.send({ message: "Invalid credentials", status: 400 });
     }
   } catch (error) {
-    console.log({ error });
-    res.send({ message: "Error signing in" });
+    res.send({ message: "Error signing in", status: 500 });
   }
 };
 
-User.signup = async (req, res) => {
-  console.log(req.body);
+User.register = async (req, res) => {
   const { username, email, password } = req.body;
+
+  if (
+    !username ||
+    !email ||
+    !password ||
+    username.length === 0 ||
+    email.length === 0 ||
+    password.length === 0
+  ) {
+    res.send({ message: "Fields cannot be blank", status: 400 });
+    return;
+  }
 
   const salt = await bcrypt.genSalt(SALT_ROUNDS);
   const hash = await bcrypt.hash(password, salt);
 
   try {
-    // TODO replace with database data
-    const id = 1; //await Users.create(username, email, hash);
+    const id = await Users.create(username, email, hash);
+
     req.session.user = {
       id,
       username,
       email,
     };
 
-    console.log("signed up");
-    console.log(req.session.user);
-
-    res.redirect("/lobby");
+    res.send({ url: "/lobby", status: 200 });
   } catch (error) {
-    console.log({ error });
-    res.render("register", {
-      title: "Jrob's Term Project",
-      username,
-      email,
-      err_msg: "Error signing up",
-    });
+    res.send({ message: "Error signing up", status: 500 });
   }
 };
 
 User.signout = async (req, res) => {
   try {
     req.session.destroy();
-    res.redirect("/");
+    res.send({ url: "/", status: 200 });
   } catch (err) {
-    res.send({ message: "Error logging out" });
+    res.send({ message: "Error logging out", status: 500 });
   }
 };
 
 User.getUserSession = async (req, res) => {
-  // res.send({ user: req.session.user });
-  res.send({ user: { name: "John Doe", user_id: 12 } });
+  res.send({ user: req.session.user });
 };
 
 module.exports = User;

@@ -1,14 +1,81 @@
-const signup = () => {
-  //TODO implement
-  console.log("signed up");
+const showMessageAuth = (data) => {
+  document.getElementById("msg-id").innerText = data.message;
+
+  setTimeout(() => {
+    document.getElementById("msg-id").innerText = "";
+  }, 5000);
 };
 
-const signin = () => {
-  //TODO implement
-  console.log("signed in");
+const register = async () => {
+  const form = document.getElementById("register-form-id");
+  const formData = new FormData(form);
+  const formDataJson = {};
+
+  for (const [key, value] of formData) {
+    formDataJson[key] = value;
+  }
+
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formDataJson),
+  };
+
+  try {
+    const res = await fetch(`/api/users/register`, options);
+    const data = await res.json();
+
+    if (data.status === 400 || data.status === 500) {
+      showMessageAuth(data);
+      return;
+    }
+
+    window.location.href = data.url;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-const signout = () => {
-  //TODO implement
-  console.log("signed out");
+const signin = async () => {
+  const form = document.getElementById("signin-form-id");
+  const formData = new FormData(form);
+  const formDataJson = {};
+
+  for (const [key, value] of formData) {
+    formDataJson[key] = value;
+  }
+
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formDataJson),
+  };
+
+  try {
+    const res = await fetch(`/api/users/signin`, options);
+    const data = await res.json();
+
+    if (data.status === 400 || data.status === 500) {
+      showMessageAuth(data);
+      return;
+    }
+
+    window.location.href = data.url;
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const signout = async () => {
+  try {
+    const res = await fetch(`/api/users/signout`);
+    const data = await res.json();
+    window.location.href = data.url;
+  } catch (err) {
+    console.log(err);
+  }
 };

@@ -5,6 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./server.js",
+    "db:initcards": "node ./backend/db/initcards.js",
     "start:dev": "concurrently \"npm:server:dev\" \"npm:build:dev\"",
     "server:dev": "NODE_ENV=development nodemon -e js,pug --watch backend ./server.js",
     "start:dev:windows": "npm run server:dev:windows & npm run build:dev",
@@ -23,6 +24,7 @@
     "@babel/core": "^7.21.8",
     "babel-loader": "^9.1.2",
     "bcrypt": "^5.1.0",
+    "connect-pg-simple": "^8.0.0",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",

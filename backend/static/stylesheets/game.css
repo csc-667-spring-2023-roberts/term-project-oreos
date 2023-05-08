@@ -1,0 +1,34 @@
+.chat-list-container {
+  display: block;
+}
+
+.chat-list {
+  border: 2px solid white;
+  width: 400px;
+  height: 600px;
+  overflow-y: scroll;
+  font-size: 20px;
+}
+
+.game-cards-container {
+  display: block;
+}
+
+.game-cards {
+  border: 2px solid white;
+  width: 900px;
+  height: 600px;
+  overflow-y: scroll;
+  display: block;
+}
+
+.container {
+  display: flex;
+}
+
+.draw-btn {
+  height: 50px;
+  width: 100px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}

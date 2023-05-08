@@ -228,6 +228,12 @@ Game.drawCard = (req, res) => {
   playerInfo.hand.push(card);
   playerInfoNewCards.hand.push(card);
 
+  if (deck.length <= 0) {
+    const cards = shuffleCards(discardPile);
+    deck = cards;
+    discardPile = [deck.pop()];
+  }
+
   io.in(game_id).emit(DRAW_CARD, { game_id, user_id, discardPile, deck });
 
   res.send({
