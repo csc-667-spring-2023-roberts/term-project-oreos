@@ -23,7 +23,11 @@ User.signin = async (req, res) => {
         email,
       };
 
-      res.send({ url: "/lobby", status: 200 });
+      res.send({
+        url: "/lobby",
+        status: 200,
+        user: { username: username, id: id },
+      });
     } else {
       res.send({ message: "Invalid credentials", status: 400 });
     }
@@ -59,7 +63,11 @@ User.register = async (req, res) => {
       email,
     };
 
-    res.send({ url: "/lobby", status: 200 });
+    res.send({
+      url: "/lobby",
+      status: 200,
+      user: { username: username, id: id },
+    });
   } catch (error) {
     res.send({ message: "Error signing up", status: 500 });
   }

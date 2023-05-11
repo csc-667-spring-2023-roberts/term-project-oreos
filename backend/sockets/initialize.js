@@ -13,9 +13,8 @@ const initSockets = (app, sessionMiddleware) => {
 
     _socket.on(JOIN_GAME, ({ game_id, user }) => {
       _socket.join(game_id);
-
-      console.log(user);
-      const message = "Joined room: " + game_id;
+      const username = user ? user.username : "null";
+      const message = username + " joined room: " + game_id;
 
       // store player in database after joined game
 

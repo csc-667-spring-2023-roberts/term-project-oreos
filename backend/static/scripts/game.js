@@ -158,6 +158,35 @@ const sendMessage = async () => {
   }
 };
 
+const getAllMessages = async () => {
+  try {
+    const game_id = getGameId(document.location.pathname);
+    const res = await fetch(`/api/games/${game_id}/chat`, { method: "GET" });
+    const data = await res.json();
+    const messageArray = data.messageArray;
+
+    if (data.status === 400 || data.status === 500) {
+      return;
+    }
+
+    let chatList = document.getElementById("chat-list-id");
+
+    if (!chatList) {
+      return;
+    }
+
+    chatList.innerHTML = "";
+
+    messageArray.map((msg) => {
+      let li = document.createElement("li");
+      li.innerHTML = `${msg.username}: ${msg.message} ${msg.created_at}`;
+      chatList.appendChild(li);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const playCard = async (cardName) => {
   const formDataJson = {};
 
@@ -264,3 +293,5 @@ const endGame = () => {
 setTimeout(async () => {
   await initCards();
 }, 1000);
+
+getAllMessages();

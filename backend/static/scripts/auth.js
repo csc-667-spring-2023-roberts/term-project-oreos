@@ -32,6 +32,7 @@ const register = async () => {
       return;
     }
 
+    localStorage.setItem("user", JSON.stringify(data.user));
     window.location.href = data.url;
   } catch (err) {
     console.log(err);
@@ -64,6 +65,7 @@ const signin = async () => {
       return;
     }
 
+    localStorage.setItem("user", JSON.stringify(data.user));
     window.location.href = data.url;
   } catch (err) {
     console.log(err);
@@ -74,6 +76,8 @@ const signout = async () => {
   try {
     const res = await fetch(`/api/users/signout`);
     const data = await res.json();
+
+    localStorage.removeItem("user");
     window.location.href = data.url;
   } catch (err) {
     console.log(err);

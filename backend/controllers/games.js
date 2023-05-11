@@ -8,6 +8,11 @@ const {
 const fs = require("fs");
 const path = require("path");
 const Game = {};
+const GAMECHAT = require("../db/gamechat.js");
+const Games = require("../db/games.js");
+
+let top_deck = "";
+let top_discard = "";
 
 let deck = [];
 let discardPile = [];
@@ -65,12 +70,25 @@ Game.createGame = async (req, res) => {
 
   // Insert info into db
   // use db column id as game id
-  const game_id = 1;
+  const game_title = gametitle;
+  const users_required = count;
 
-  io.emit(CREATE_GAME, { gametitle, count, user_id, game_id });
+  const { id: game_id } = await Games.create(
+    game_title,
+    false,
+    "0-0",
+    "0-1",
+    0,
+    users_required
+  );
+  console.log("game created");
+  console.log(game_id);
+
+  io.emit(CREATE_GAME, { gametitle, count, user_id, game_id, ongoing: false });
   res.send({
     game_id: game_id,
     gametitle: gametitle,
+    ongoing: false,
     player_count: count,
     user_id: user_id,
     status: 201,
@@ -263,10 +281,28 @@ Game.sendMessage = async (req, res) => {
     res.send({ message: "Please type a message", status: 400 });
     return;
   }
-  // insert info into db
 
-  io.in(game_id).emit(CHAT, { message, username });
-  res.send({ message: message, username: username, status: 200 });
+  try {
+    const room_id = game_id;
+    await GAMECHAT.create(username, message, room_id);
+    io.in(game_id).emit(CHAT, { message, username });
+    res.send({ message: message, username: username, status: 200 });
+  } catch (err) {
+    console.log(err);
+    res.send({ message: "Error sending message", status: 500 });
+  }
+};
+
+Game.getAllMessages = async (req, res) => {
+  const { game_id } = req.params;
+
+  try {
+    const messageArray = await GAMECHAT.get(game_id);
+    res.send({ messageArray: messageArray, status: 200 });
+  } catch (err) {
+    console.log(err);
+    res.send({ message: "Error getting all messages", status: 500 });
+  }
 };
 
 Game.saveGameState = async (req, res) => {
@@ -277,11 +313,6 @@ Game.saveGameState = async (req, res) => {
 Game.getGameState = async (req, res) => {
   // TODO implement
   res.send({ message: "Game state retrieved" });
-};
-
-Game.getAllGames = async (req, res) => {
-  // TODO implement
-  res.send({ message: "Retrieved all games" });
 };
 
 Game.getGameSession = async (req, res) => {

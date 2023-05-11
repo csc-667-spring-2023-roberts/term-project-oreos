@@ -14,11 +14,7 @@ import {
 const socket = io();
 const game_id = getGameId(document.location.pathname);
 
-// TODO get user from session
-const user = {
-  name: "Tom",
-  user_id: 1,
-};
+const user = JSON.parse(localStorage.getItem("user"));
 
 socket.emit(JOIN_GAME, { game_id, user });
 
@@ -26,7 +22,7 @@ socket.on(REDIRECT_TO_GAME_ROOM, ({ game_id }) => {
   window.location.href = `/games/${game_id}`;
 });
 
-socket.on(CREATE_GAME, ({ gametitle, count, user_id, game_id }) => {
+socket.on(CREATE_GAME, ({ gametitle, count, user_id, game_id, ongoing }) => {
   let gamesList = document.getElementById("games-list-id");
 
   if (!gamesList) {
@@ -34,7 +30,7 @@ socket.on(CREATE_GAME, ({ gametitle, count, user_id, game_id }) => {
   }
 
   let li = document.createElement("li");
-  li.innerHTML = `Name: <a href="/waitingroom/${game_id}">${gametitle}</a>, Players: ${count}`;
+  li.innerHTML = `Title: <a href="/waitingroom/${game_id}">${gametitle}</a>, Players: ${count}, Started: ${ongoing}`;
   gamesList.appendChild(li);
 });
 
@@ -65,8 +61,6 @@ socket.on(START_GAME, ({ deck, discardPile }) => {
 });
 
 socket.on(JOIN_GAME, ({ message, numPlayers }) => {
-  console.log(message);
-
   if (!document.getElementById("num-of-players-id")) {
     return;
   }
