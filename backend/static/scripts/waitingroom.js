@@ -16,14 +16,29 @@ const getGameId = (location) => {
   }
 };
 
-const isOnGoingGame = () => {
+const isOnGoingGame = async () => {
   // get game session to see if it is ongoing
   // if so then redirect joining player to that game
+  // fetch gamestate in backend
+  const game_id = getGameId(document.location.pathname);
   let isOnGoing = false;
 
-  if (isOnGoing) {
-    const game_id = getGameId(document.location.pathname);
-    window.location.href = `/games/${game_id}`;
+  try {
+    const res = await fetch(`/api/waitingroom/${game_id}/ongoing`);
+    const data = await res.json();
+    console.log(data);
+    isOnGoing = data.ongoing;
+
+    if (data.status === 400 || data.status === 500) {
+      showMessage(data);
+      return;
+    }
+
+    if (isOnGoing) {
+      window.location.href = `/games/${game_id}`;
+    }
+  } catch (err) {
+    console.log(err);
   }
 };
 
@@ -31,7 +46,7 @@ const checkPlayerCount = async () => {
   const game_id = getGameId(document.location.pathname);
 
   try {
-    const res = await fetch(`/api/waitingroom/${game_id}`);
+    const res = await fetch(`/api/waitingroom/${game_id}/count`);
     const data = await res.json();
 
     if (data.status === 400 || data.status === 500) {

@@ -10,7 +10,6 @@ const {
   getAllMessages,
   saveGameState,
   getGameState,
-  getGameSession,
 } = require("../controllers/games.js");
 
 const {
@@ -19,20 +18,21 @@ const {
   getAllGames,
 } = require("../controllers/lobby.js");
 
+const { isAuthenticated } = require("../middleware/auth.js");
+
 const router = express.Router();
-router.post("/create", createGame);
-router.post("/lobby-chat", sendMessageLobby);
-router.get("/lobby-chat", getMessageLobby);
-router.post("/:game_id/start", startGame);
-router.post("/:game_id/end", endGame);
-router.put("/:game_id/play", playCard);
-router.put("/:game_id/draw", drawCard);
-router.put("/:game_id/uno", callUno);
-router.post("/:game_id/chat", sendMessage);
-router.get("/:game_id/chat", getAllMessages);
-router.put("/:game_id/state", saveGameState);
-router.get("/:game_id/state", getGameState);
-router.get("/all-games", getAllGames);
-router.get("/game-session", getGameSession);
+router.post("/create", isAuthenticated, createGame);
+router.post("/lobby-chat", isAuthenticated, sendMessageLobby);
+router.get("/lobby-chat", isAuthenticated, getMessageLobby);
+router.post("/:game_id/start", isAuthenticated, startGame);
+router.post("/:game_id/end", isAuthenticated, endGame);
+router.put("/:game_id/play", isAuthenticated, playCard);
+router.put("/:game_id/draw", isAuthenticated, drawCard);
+router.put("/:game_id/uno", isAuthenticated, callUno);
+router.post("/:game_id/chat", isAuthenticated, sendMessage);
+router.get("/:game_id/chat", isAuthenticated, getAllMessages);
+router.put("/:game_id/state", isAuthenticated, saveGameState);
+router.get("/:game_id/state", isAuthenticated, getGameState);
+router.get("/all-games", isAuthenticated, getAllGames);
 
 module.exports = router;

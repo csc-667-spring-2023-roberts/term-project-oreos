@@ -18,7 +18,78 @@ const getAll = async () => {
   return await db.many("SELECT * FROM games");
 };
 
+const isGameStarted = async (game_id) => {
+  return await db.oneOrNone("SELECT ongoing FROM games WHERE id = $1", [
+    game_id,
+  ]);
+};
+
+const getNumberOfPlayers = async (game_id) => {
+  return await db.oneOrNone("SELECT users_required FROM games WHERE id = $1", [
+    game_id,
+  ]);
+};
+
+const setGameOngoing = async (ongoing, game_id) => {
+  return await db.oneOrNone(
+    "UPDATE games SET ongoing=$1 WHERE id = $2 RETURNING ongoing",
+    [ongoing, game_id]
+  );
+};
+
+const saveGameState = async (top_deck, top_discard, position) => {
+  return await db.oneOrNone(
+    "UPDATE games set top_deck=$1, top_discard=$2, position=$3 RETURNING *",
+    [top_deck, top_discard, position]
+  );
+};
+
+const getGameState = async (game_id) => {
+  return await db.oneOrNone("SELECT * FROM games WHERE id=$1", [game_id]);
+};
+
+const getAllCards = async () => {
+  return await db.manyOrNone("SELECT * FROM cards");
+};
+
+const getAllUserCards = async (user_id) => {
+  return await db.manyOrNone(
+    "SELECT card_id FROM user_cards WHERE user_id = $1",
+    [user_id]
+  );
+};
+
+const createGameUser = async (game_id, user_id, ongoing, turn) => {
+  return await db.oneOrNone(
+    "INSERT INTO game_users (game_id, user_id, ongoing, turn) VALUES ($1, $2, $3, $4) RETURNING *",
+    [game_id, user_id, ongoing, turn]
+  );
+};
+
+const isPlayerStarted = async (user_id) => {
+  return await db.oneOrNone("SELECT ongoing FROM game_users WHERE user_id=$1", [
+    user_id,
+  ]);
+};
+
+const createUserCard = async (game_id, user_id, card_id) => {
+  return await db.oneOrNone(
+    "INSERT INTO user_cards (game_id, user_id, card_id) VALUES ($1, $2, $3) RETURNING card_id",
+    [game_id, user_id, card_id]
+  );
+};
+
 module.exports = {
   create,
   getAll,
+  isGameStarted,
+  setGameOngoing,
+  getNumberOfPlayers,
+  saveGameState,
+  getGameState,
+  getAllCards,
+  getAllUserCards,
+  createGameUser,
+  createUserCard,
+  isPlayerStarted,
 };

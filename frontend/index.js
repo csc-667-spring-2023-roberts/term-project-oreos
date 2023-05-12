@@ -46,7 +46,7 @@ socket.on(CHAT, ({ message, username }) => {
   chatList.appendChild(li);
 });
 
-socket.on(START_GAME, ({ deck, discardPile }) => {
+socket.on(START_GAME, ({ top_deck, top_discard }) => {
   const imgPath = "../images/";
 
   if (
@@ -56,8 +56,8 @@ socket.on(START_GAME, ({ deck, discardPile }) => {
     return;
   }
 
-  document.getElementById("deck-img-id").src = imgPath + deck[0];
-  document.getElementById("discard-img-id").src = imgPath + discardPile[0];
+  document.getElementById("deck-img-id").src = imgPath + top_deck;
+  document.getElementById("discard-img-id").src = imgPath + top_discard;
 });
 
 socket.on(JOIN_GAME, ({ message, numPlayers }) => {
@@ -71,13 +71,12 @@ socket.on(JOIN_GAME, ({ message, numPlayers }) => {
   }
 });
 
-socket.on(PLAY_CARD, ({ card_id, game_id, user_id, discardPile }) => {
+socket.on(PLAY_CARD, ({ card_id, game_id, user_id, top_discard }) => {
   const imgPath = "../images/";
-  document.getElementById("discard-img-id").src =
-    imgPath + discardPile[discardPile.length - 1];
+  document.getElementById("discard-img-id").src = imgPath + top_discard;
 });
 
-socket.on(DRAW_CARD, ({ card_id, game_id, user_id, discardPile, deck }) => {
+socket.on(DRAW_CARD, ({ card_id, game_id, user_id, discardPile, top_deck }) => {
   const imgPath = "../images/";
-  document.getElementById("deck-img-id").src = imgPath + deck[deck.length - 1];
+  document.getElementById("deck-img-id").src = imgPath + top_deck;
 });

@@ -5,25 +5,14 @@ const {
   PLAY_CARD,
   DRAW_CARD,
 } = require("../sockets/constants.js");
-const fs = require("fs");
-const path = require("path");
 const Game = {};
 const GAMECHAT = require("../db/gamechat.js");
 const Games = require("../db/games.js");
 
 let top_deck = "";
 let top_discard = "";
-
-let deck = [];
-let discardPile = [];
 let players = [];
 let opponents = [];
-
-const emptyCards = () => {
-  deck = [];
-  opponents = [];
-  discardPile = [];
-};
 
 const shuffleCards = (cards) => {
   let temp = null;
@@ -36,22 +25,19 @@ const shuffleCards = (cards) => {
 
   return cards;
 };
-const getCards = () => {
-  const folderPath = path.join(__dirname, "..", "static", "images");
-  const cards = [];
+const getCards = async () => {
+  const cardsArr = [];
 
-  return new Promise((resolve, reject) => {
-    fs.readdir(folderPath, (err, files) => {
-      if (err) {
-        reject(err);
-      } else {
-        files.forEach((file) => {
-          cards.push(file);
-        });
-        resolve(cards);
-      }
+  const cards = await Games.getAllCards();
+
+  for (const card of cards) {
+    cardsArr.push({
+      id: card.card_id,
+      name: card.card_color + "-" + card.card_number + ".png",
     });
-  });
+  }
+
+  return cardsArr;
 };
 
 Game.createGame = async (req, res) => {
@@ -68,8 +54,6 @@ Game.createGame = async (req, res) => {
     return;
   }
 
-  // Insert info into db
-  // use db column id as game id
   const game_title = gametitle;
   const users_required = count;
 
@@ -81,8 +65,6 @@ Game.createGame = async (req, res) => {
     0,
     users_required
   );
-  console.log("game created");
-  console.log(game_id);
 
   io.emit(CREATE_GAME, { gametitle, count, user_id, game_id, ongoing: false });
   res.send({
@@ -96,79 +78,139 @@ Game.createGame = async (req, res) => {
 };
 
 Game.startGame = async (req, res) => {
-  emptyCards();
-
-  // check if game already started by checking db if so then skip card setup
-  // if player is joining current game then setup only their hand
-
-  const user_id = 1;
-  const { game_id } = req.body;
-
+  const { game_id, user_id } = req.body;
   const io = req.app.get("io");
-
-  if (!io.sockets.adapter.rooms.get(+game_id)) {
-    res.send({ message: "An error occured", status: 500 });
-    return;
-  }
-
   const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
 
-  if (numPlayers < 2) {
-    res.send({ message: "Need at least two players", status: 400 });
-    return;
-  }
+  try {
+    const { users_required } = await Games.getNumberOfPlayers(game_id);
 
-  let cards = await getCards();
-
-  cards = shuffleCards(cards);
-
-  for (let i = 0; i < cards.length; i++) {
-    if (cards[i] === "back.png") {
-      continue;
-    }
-
-    deck.push(cards[i]);
-  }
-
-  //TODO get players from db
-  players = [
-    { name: "Tom", hand: [], user_id: 1 },
-    { name: "Bob", hand: [], user_id: 2 },
-  ];
-
-  const cardsInHand = 7;
-  for (let i = 0; i < numPlayers; i++) {
-    if (user_id !== players[i].user_id) {
-      opponents.push({
-        name: players[i].name,
-        hand: new Array(7).fill("back.png"),
-        user_id: players[i].user_id,
+    if (numPlayers < users_required) {
+      res.send({
+        url: `/lobby`,
+        message: `Need at least ${users_required} players`,
+        status: 400,
       });
+      return;
     }
-    for (let j = 0; j < cardsInHand; j++) {
-      players[i].hand.push(deck.pop());
+
+    const { ongoing } = await Games.isGameStarted(game_id);
+    const { ongoing: isPlayerOngoing } = await Games.isPlayerStarted(user_id);
+
+    if (ongoing && isPlayerOngoing) {
+      const userCards = await Games.getAllUserCards(user_id);
+      const gameState = await Games.getGameState(game_id);
+
+      const userCardsObj = {};
+      userCards.forEach((elem) => {
+        userCardsObj[elem.card_id] = elem;
+      });
+
+      let cardsArr = await getCards();
+      let cards = shuffleCards(cardsArr);
+      const player = {
+        name: req.session.user?.username,
+        user_id: user_id,
+        hand: [],
+      };
+
+      cards.forEach((card) => {
+        if (card.id in userCardsObj) {
+          player.hand.push(card.name);
+        }
+      });
+
+      top_deck = gameState.top_deck + ".png";
+      top_discard = gameState.top_discard + ".png";
+      let playerInfo = {};
+
+      playerInfo = player;
+      players.push(player);
+
+      io.in(game_id).emit(START_GAME, {
+        top_deck,
+        top_discard,
+        game_id,
+        opponents,
+      });
+      res.send({
+        message: "Game already started",
+        status: 200,
+        ongoing: ongoing,
+        playerInfo: playerInfo,
+        opponents: opponents,
+      });
+      return;
     }
+  } catch (err) {
+    console.log(err);
   }
 
-  let playerInfo = [];
-  for (let i = 0; i < players.length; i++) {
-    if (user_id === players[i].user_id) {
-      playerInfo = players[i];
+  try {
+    const { users_required } = await Games.getNumberOfPlayers(game_id);
+
+    if (numPlayers < users_required) {
+      res.send({
+        url: `/lobby`,
+        message: `Need at least ${users_required} players`,
+        status: 400,
+      });
+      return;
     }
+
+    const gameState = await Games.getGameState(game_id);
+    top_deck = gameState.top_deck + ".png";
+    top_discard = gameState.top_discard + ".png";
+
+    if (!io.sockets.adapter.rooms.get(+game_id)) {
+      res.send({ message: "An error occured", status: 500 });
+      return;
+    }
+
+    let cardsArr = await getCards();
+    let cards = shuffleCards(cardsArr);
+    const player = {
+      name: req.session.user?.username,
+      user_id: user_id,
+      hand: [],
+    };
+    player.hand = [];
+    await Games.createGameUser(game_id, user_id, true, 0);
+
+    const cardsInHand = 7;
+    for (let i = 0; i < cardsInHand; i++) {
+      const poppedCard = cards.pop();
+      const card_id = poppedCard.id;
+      const card_name = poppedCard.name;
+      await Games.createUserCard(game_id, user_id, card_id);
+      player.hand.push(card_name);
+    }
+
+    let playerInfo = player;
+    const { ongoing: ongoingUpdated } = await Games.setGameOngoing(
+      true,
+      game_id
+    );
+    players.push(player);
+
+    io.in(game_id).emit(START_GAME, {
+      top_deck,
+      top_discard,
+      game_id,
+      opponents,
+    });
+    res.send({
+      message: "Game started",
+      playersCount: numPlayers,
+      playerInfo: playerInfo,
+      opponents: opponents,
+      ongoingUpdated: ongoingUpdated,
+      status: 200,
+    });
+  } catch (err) {
+    console.log(err);
+    res.send({ message: "Error occured", status: 500 });
   }
-
-  discardPile.push(deck.pop());
-
-  io.in(game_id).emit(START_GAME, { deck, discardPile, game_id, opponents });
-  res.send({
-    message: "Game started",
-    discardPile: discardPile,
-    deck: deck,
-    playersCount: numPlayers,
-    playerInfo: playerInfo,
-    opponents: opponents,
-    status: 200,
-  });
 };
 
 Game.endGame = async (req, res) => {
@@ -177,9 +219,10 @@ Game.endGame = async (req, res) => {
 };
 
 Game.playCard = async (req, res) => {
-  // get player from db
   // make sure user is in the game
   // make sure player turn
+  // make sure player can play the card
+  // handle special hards
 
   const { game_id, user_id, card_id } = req.body;
   const io = req.app.get("io");
@@ -195,8 +238,9 @@ Game.playCard = async (req, res) => {
     }
   }
 
-  discardPile.push(card_id);
-  io.in(game_id).emit(PLAY_CARD, { card_id, game_id, user_id, discardPile });
+  top_discard = card_id;
+
+  io.in(game_id).emit(PLAY_CARD, { card_id, game_id, user_id, top_discard });
   res.send({
     message: "Played card: " + card_id,
     playerInfo: playerInfo,
@@ -205,10 +249,12 @@ Game.playCard = async (req, res) => {
 };
 
 Game.drawCard = (req, res) => {
+  // make sure user is in the game
+  // make sure player turn
+
   const { game_id, user_id } = req.body;
   const io = req.app.get("io");
 
-  // get current player's turn from db
   let playerInfo = {};
   let playerInfoNewCards = {};
 
@@ -225,11 +271,11 @@ Game.drawCard = (req, res) => {
   }
 
   // penalty did not call uno
-  if (playerInfo.hand.length === 1) {
+  if (playerInfo.hand?.length === 1) {
     for (let i = 0; i < 2; i++) {
-      const card = deck.pop();
-      playerInfo.hand.push(card);
-      playerInfoNewCards.hand.push(card);
+      const card = top_deck;
+      playerInfo.hand?.push(card);
+      playerInfoNewCards.hand?.push(card);
     }
 
     res.send({
@@ -242,23 +288,20 @@ Game.drawCard = (req, res) => {
     return;
   }
 
-  const card = deck.pop();
-  playerInfo.hand.push(card);
-  playerInfoNewCards.hand.push(card);
+  const card = top_deck;
+  playerInfo.hand?.push(card);
+  playerInfoNewCards.hand?.push(card);
 
-  if (deck.length <= 0) {
-    const cards = shuffleCards(discardPile);
-    deck = cards;
-    discardPile = [deck.pop()];
-  }
+  //todo: placeholder, update top deck to a random card from db after player draws current card it
+  top_deck = "2-5.png";
 
-  io.in(game_id).emit(DRAW_CARD, { game_id, user_id, discardPile, deck });
+  io.in(game_id).emit(DRAW_CARD, { game_id, user_id, top_discard, top_deck });
 
   res.send({
     message: "Drawn card: " + card,
     playerInfo: playerInfo,
     playerInfoNewCards: playerInfoNewCards,
-    numPlayerCards: playerInfo.hand.length,
+    numPlayerCards: playerInfo.hand?.length,
     status: 200,
   });
 };
@@ -313,11 +356,6 @@ Game.saveGameState = async (req, res) => {
 Game.getGameState = async (req, res) => {
   // TODO implement
   res.send({ message: "Game state retrieved" });
-};
-
-Game.getGameSession = async (req, res) => {
-  // res.send({ game: req.session.game });
-  res.send({ game: { game_id: 1 } });
 };
 
 module.exports = Game;

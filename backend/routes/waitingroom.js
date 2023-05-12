@@ -1,7 +1,11 @@
 const express = require("express");
-const { checkPlayerCounts } = require("../controllers/waitingroom.js");
+const {
+  checkPlayerCounts,
+  isOnGoingGame,
+} = require("../controllers/waitingroom.js");
 
 const router = express.Router();
-router.get("/:game_id", checkPlayerCounts);
+router.get("/:game_id/count", checkPlayerCounts);
+router.get("/:game_id/ongoing", isOnGoingGame);
 
 module.exports = router;

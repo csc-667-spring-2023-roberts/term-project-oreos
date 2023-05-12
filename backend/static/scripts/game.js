@@ -54,18 +54,18 @@ const initCards = async () => {
       showMessage(data);
       return;
     }
+
+    startGame();
   } catch (err) {
     console.log(err);
   }
-
-  startGame();
 };
 
 const addCardsToPlayerHand = () => {
-  const playerHandUI = document.createElement("div");
+  const parentHandUI = document.getElementById("player-hand-parent-id");
+  let playerHandUI = document.createElement("div");
   playerHandUI.id = "player-hand-id";
   const playerTitle = document.createElement("p");
-
   playerTitle.innerText = playerInfo.name;
 
   playerInfo.hand.forEach((card) => {
@@ -85,41 +85,42 @@ const addCardsToPlayerHand = () => {
     playerHandUI.appendChild(cardImage);
   });
 
-  document.getElementById("player-hand-parent-id").appendChild(playerTitle);
-  document.getElementById("player-hand-parent-id").appendChild(playerHandUI);
+  parentHandUI.innerHTML = "";
+  parentHandUI.appendChild(playerTitle);
+  parentHandUI.appendChild(playerHandUI);
 };
 
-const addCardsToOpponentHand = () => {
-  opponents.forEach((opponent) => {
-    const opponentHandUI = document.createElement("div");
-    opponentHandUI.id = "opponent-hand-id";
-    const playerTitle = document.createElement("p");
+// const addCardsToOpponentHand = () => {
+//   opponents.forEach((opponent) => {
+//     let opponentHandUI = document.createElement("div");
+//     opponentHandUI.innerHTML = ""
+//     opponentHandUI.id = "opponent-hand-id";
+//     const playerTitle = document.createElement("p");
 
-    playerTitle.innerText = opponent.name;
+//     playerTitle.innerText = opponent.name;
 
-    opponent.hand.forEach((card) => {
-      const cardImage = document.createElement("img");
-      cardImage.id = card + "-id";
-      cardImage.setAttribute("src", `${imgPath}${card}`);
-      cardImage.setAttribute("class", `${opponent.name}`);
-      cardImage.setAttribute("width", "100px");
-      cardImage.setAttribute("height", "100px");
-      opponentHandUI.appendChild(cardImage);
-    });
+//     opponent.hand.forEach((card) => {
+//       const cardImage = document.createElement("img");
+//       cardImage.id = card + "-id";
+//       cardImage.setAttribute("src", `${imgPath}${card}`);
+//       cardImage.setAttribute("class", `${opponent.name}`);
+//       cardImage.setAttribute("width", "100px");
+//       cardImage.setAttribute("height", "100px");
+//       opponentHandUI.appendChild(cardImage);
+//     });
 
-    document
-      .getElementById("opponents-hand-parent-id")
-      .appendChild(playerTitle);
-    document
-      .getElementById("opponents-hand-parent-id")
-      .appendChild(opponentHandUI);
-  });
-};
+//     document
+//       .getElementById("opponents-hand-parent-id")
+//       .appendChild(playerTitle);
+//     document
+//       .getElementById("opponents-hand-parent-id")
+//       .appendChild(opponentHandUI);
+//   });
+// };
 
 const startGame = () => {
   addCardsToPlayerHand(playerInfo);
-  addCardsToOpponentHand();
-  console.log("init and started game");
+  //addCardsToOpponentHand();
 };
 
 const sendMessage = async () => {
