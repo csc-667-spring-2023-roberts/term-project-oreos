@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node ./server.js",
-    "db:initcards": "node ./backend/db/initcards.js",
+    "db:initcards": "node ./backend/db/initCards.js",
     "start:dev": "concurrently \"npm:server:dev\" \"npm:build:dev\"",
     "server:dev": "NODE_ENV=development nodemon -e js,pug --watch backend ./server.js",
     "start:dev:windows": "npm run server:dev:windows & npm run build:dev",
