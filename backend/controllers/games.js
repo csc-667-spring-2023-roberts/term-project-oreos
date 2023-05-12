@@ -83,7 +83,8 @@ Game.startGame = async (req, res) => {
   const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
 
   try {
-    const { users_required } = await Games.getNumberOfPlayers(game_id);
+    let users_required = await Games.getNumberOfPlayers(game_id);
+    users_required = users_required?.users_required || 2;
 
     if (numPlayers < users_required) {
       res.send({
@@ -94,11 +95,14 @@ Game.startGame = async (req, res) => {
       return;
     }
 
-    const { ongoing } = await Games.isGameStarted(game_id);
-    const { ongoing: isPlayerOngoing } = await Games.isPlayerStarted(user_id);
+    let isOngoingGame = await Games.isGameStarted(game_id);
+    isOngoingGame = isOngoingGame?.ongoing || false;
 
-    if (ongoing && isPlayerOngoing) {
-      const userCards = await Games.getAllUserCards(user_id);
+    let isPlayerOngoing = await Games.isPlayerStarted(user_id, game_id);
+    isPlayerOngoing = isPlayerOngoing?.ongoing || false;
+
+    if (isOngoingGame && isPlayerOngoing) {
+      const userCards = await Games.getAllUserCards(user_id, game_id);
       const gameState = await Games.getGameState(game_id);
 
       const userCardsObj = {};
@@ -108,7 +112,8 @@ Game.startGame = async (req, res) => {
 
       let cardsArr = await getCards();
       let cards = shuffleCards(cardsArr);
-      const player = {
+
+      const playerInfo = {
         name: req.session.user?.username,
         user_id: user_id,
         hand: [],
@@ -116,16 +121,26 @@ Game.startGame = async (req, res) => {
 
       cards.forEach((card) => {
         if (card.id in userCardsObj) {
-          player.hand.push(card.name);
+          playerInfo.hand.push(card.name);
         }
       });
 
+      let foundExistingPlayer = false;
+
+      for (let i = 0; i < players.length; i++) {
+        if (players[i].user_id === user_id) {
+          foundExistingPlayer = true;
+          players[i].hand = playerInfo.hand;
+          break;
+        }
+      }
+
+      if (!foundExistingPlayer) {
+        players.push(playerInfo);
+      }
+
       top_deck = gameState.top_deck + ".png";
       top_discard = gameState.top_discard + ".png";
-      let playerInfo = {};
-
-      playerInfo = player;
-      players.push(player);
 
       io.in(game_id).emit(START_GAME, {
         top_deck,
@@ -136,18 +151,12 @@ Game.startGame = async (req, res) => {
       res.send({
         message: "Game already started",
         status: 200,
-        ongoing: ongoing,
+        ongoing: isOngoingGame,
         playerInfo: playerInfo,
         opponents: opponents,
       });
       return;
     }
-  } catch (err) {
-    console.log(err);
-  }
-
-  try {
-    const { users_required } = await Games.getNumberOfPlayers(game_id);
 
     if (numPlayers < users_required) {
       res.send({
@@ -174,6 +183,7 @@ Game.startGame = async (req, res) => {
       user_id: user_id,
       hand: [],
     };
+
     player.hand = [];
     await Games.createGameUser(game_id, user_id, true, 0);
 
@@ -187,10 +197,9 @@ Game.startGame = async (req, res) => {
     }
 
     let playerInfo = player;
-    const { ongoing: ongoingUpdated } = await Games.setGameOngoing(
-      true,
-      game_id
-    );
+    let ongoingUpdated = await Games.setGameOngoing(true, game_id);
+
+    ongoingUpdated = ongoingUpdated?.ongoing || false;
     players.push(player);
 
     io.in(game_id).emit(START_GAME, {
@@ -257,6 +266,8 @@ Game.drawCard = (req, res) => {
 
   let playerInfo = {};
   let playerInfoNewCards = {};
+
+  console.log(players);
 
   for (let i = 0; i < players.length; i++) {
     if (user_id === players[i].user_id) {
@@ -331,7 +342,6 @@ Game.sendMessage = async (req, res) => {
     io.in(game_id).emit(CHAT, { message, username });
     res.send({ message: message, username: username, status: 200 });
   } catch (err) {
-    console.log(err);
     res.send({ message: "Error sending message", status: 500 });
   }
 };
@@ -343,7 +353,6 @@ Game.getAllMessages = async (req, res) => {
     const messageArray = await GAMECHAT.get(game_id);
     res.send({ messageArray: messageArray, status: 200 });
   } catch (err) {
-    console.log(err);
     res.send({ message: "Error getting all messages", status: 500 });
   }
 };

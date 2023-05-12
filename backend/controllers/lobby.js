@@ -33,7 +33,6 @@ Lobby.getMessageLobby = async (req, res) => {
     const messageArray = await Chat.get();
     res.send({ messageArray: messageArray, status: 200 });
   } catch (err) {
-    console.log(err);
     res.send({ message: "Error sending message", status: 500 });
   }
 };
@@ -43,7 +42,6 @@ Lobby.getAllGames = async (req, res) => {
     const messageArray = await Games.getAll();
     res.send({ messageArray: messageArray, status: 200 });
   } catch (err) {
-    console.log(err);
     res.send({ message: "Error getting all messages", status: 500 });
   }
 };

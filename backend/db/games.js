@@ -52,10 +52,10 @@ const getAllCards = async () => {
   return await db.manyOrNone("SELECT * FROM cards");
 };
 
-const getAllUserCards = async (user_id) => {
+const getAllUserCards = async (user_id, game_id) => {
   return await db.manyOrNone(
-    "SELECT card_id FROM user_cards WHERE user_id = $1",
-    [user_id]
+    "SELECT card_id FROM user_cards WHERE user_id = $1 AND game_id=$2",
+    [user_id, game_id]
   );
 };
 
@@ -66,10 +66,11 @@ const createGameUser = async (game_id, user_id, ongoing, turn) => {
   );
 };
 
-const isPlayerStarted = async (user_id) => {
-  return await db.oneOrNone("SELECT ongoing FROM game_users WHERE user_id=$1", [
-    user_id,
-  ]);
+const isPlayerStarted = async (user_id, game_id) => {
+  return await db.oneOrNone(
+    "SELECT ongoing FROM game_users WHERE user_id=$1 AND game_id=$2",
+    [user_id, game_id]
+  );
 };
 
 const createUserCard = async (game_id, user_id, card_id) => {
