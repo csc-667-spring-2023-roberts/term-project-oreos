@@ -1,5 +1,6 @@
 head
    script(src='/scripts/auth.js', defer)
+    link(rel='stylesheet' href='/stylesheets/home.css')
 ul.topnav
     if user_id
         li  
@@ -10,6 +11,7 @@ ul.topnav
             a(href='/lobby') Lobby
         li.right
             a(href='/' onclick="signout()") Sign-out
+            
     else
         li  
             a(href='/') UNO
