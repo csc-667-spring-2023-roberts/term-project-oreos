@@ -7,7 +7,7 @@ WaitingRoom.isOnGoingGame = async (req, res) => {
 
   try {
     const { ongoing } = await Games.isGameStarted(game_id);
-    console.log(ongoing);
+
     if (ongoing) {
       res.send({
         message: "Game has already started",

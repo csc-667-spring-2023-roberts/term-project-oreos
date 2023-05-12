@@ -12,7 +12,6 @@ const Games = require("../db/games.js");
 let top_deck = "";
 let top_discard = "";
 let players = [];
-let opponents = [];
 
 const shuffleCards = (cards) => {
   let temp = null;
@@ -146,14 +145,14 @@ Game.startGame = async (req, res) => {
         top_deck,
         top_discard,
         game_id,
-        opponents,
+        players,
       });
       res.send({
         message: "Game already started",
         status: 200,
         ongoing: isOngoingGame,
         playerInfo: playerInfo,
-        opponents: opponents,
+        players,
       });
       return;
     }
@@ -206,14 +205,14 @@ Game.startGame = async (req, res) => {
       top_deck,
       top_discard,
       game_id,
-      opponents,
+      players,
     });
     res.send({
       message: "Game started",
       playersCount: numPlayers,
       playerInfo: playerInfo,
-      opponents: opponents,
       ongoingUpdated: ongoingUpdated,
+      players,
       status: 200,
     });
   } catch (err) {
@@ -266,8 +265,6 @@ Game.drawCard = (req, res) => {
 
   let playerInfo = {};
   let playerInfoNewCards = {};
-
-  console.log(players);
 
   for (let i = 0; i < players.length; i++) {
     if (user_id === players[i].user_id) {

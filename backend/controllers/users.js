@@ -40,7 +40,6 @@ User.signin = async (req, res) => {
 User.register = async (req, res) => {
   const { username, password } = req.body;
   const email = req.body.emailAddress;
-  console.log(email);
 
   if (
     !username ||

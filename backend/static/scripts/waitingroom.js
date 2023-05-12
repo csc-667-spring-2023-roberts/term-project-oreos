@@ -26,7 +26,6 @@ const isOnGoingGame = async () => {
   try {
     const res = await fetch(`/api/waitingroom/${game_id}/ongoing`);
     const data = await res.json();
-    console.log(data);
     isOnGoing = data.ongoing;
 
     if (data.status === 400 || data.status === 500) {

@@ -1,5 +1,5 @@
 let playerInfo = [];
-let opponents = [];
+let players = [];
 const imgPath = "../images/";
 
 const showMessage = (data) => {
@@ -48,7 +48,7 @@ const initCards = async () => {
     const res = await fetch(`/api/games/${game_id}/start`, options);
     const data = await res.json();
     playerInfo = data.playerInfo;
-    opponents = data.opponents;
+    players = data.players;
 
     if (data.status === 400 || data.status === 500) {
       showMessage(data);
@@ -90,37 +90,8 @@ const addCardsToPlayerHand = () => {
   parentHandUI.appendChild(playerHandUI);
 };
 
-// const addCardsToOpponentHand = () => {
-//   opponents.forEach((opponent) => {
-//     let opponentHandUI = document.createElement("div");
-//     opponentHandUI.innerHTML = ""
-//     opponentHandUI.id = "opponent-hand-id";
-//     const playerTitle = document.createElement("p");
-
-//     playerTitle.innerText = opponent.name;
-
-//     opponent.hand.forEach((card) => {
-//       const cardImage = document.createElement("img");
-//       cardImage.id = card + "-id";
-//       cardImage.setAttribute("src", `${imgPath}${card}`);
-//       cardImage.setAttribute("class", `${opponent.name}`);
-//       cardImage.setAttribute("width", "100px");
-//       cardImage.setAttribute("height", "100px");
-//       opponentHandUI.appendChild(cardImage);
-//     });
-
-//     document
-//       .getElementById("opponents-hand-parent-id")
-//       .appendChild(playerTitle);
-//     document
-//       .getElementById("opponents-hand-parent-id")
-//       .appendChild(opponentHandUI);
-//   });
-// };
-
 const startGame = () => {
   addCardsToPlayerHand(playerInfo);
-  //addCardsToOpponentHand();
 };
 
 const sendMessage = async () => {

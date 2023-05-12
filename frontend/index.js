@@ -46,7 +46,7 @@ socket.on(CHAT, ({ message, username }) => {
   chatList.appendChild(li);
 });
 
-socket.on(START_GAME, ({ top_deck, top_discard }) => {
+socket.on(START_GAME, ({ top_deck, top_discard, players }) => {
   const imgPath = "../images/";
 
   if (
@@ -58,6 +58,33 @@ socket.on(START_GAME, ({ top_deck, top_discard }) => {
 
   document.getElementById("deck-img-id").src = imgPath + top_deck;
   document.getElementById("discard-img-id").src = imgPath + top_discard;
+
+  const parentHandUI = document.getElementById("opponents-hand-parent-id");
+  parentHandUI.innerHTML = "";
+
+  players.forEach((player) => {
+    if (user.id !== player.user_id) {
+      let playerHandUI = document.createElement("div");
+      playerHandUI.innerHTML = "";
+      playerHandUI.id = "opponent-hand-id";
+      const playerTitle = document.createElement("p");
+
+      playerTitle.innerText = player.name;
+
+      player.hand.forEach((card) => {
+        const cardImage = document.createElement("img");
+        cardImage.setAttribute("src", `${imgPath}back.png`);
+        cardImage.id = card + "-id";
+        cardImage.setAttribute("class", `${player.name}`);
+        cardImage.setAttribute("width", "100px");
+        cardImage.setAttribute("height", "100px");
+        playerHandUI.appendChild(cardImage);
+      });
+
+      parentHandUI.appendChild(playerTitle);
+      parentHandUI.appendChild(playerHandUI);
+    }
+  });
 });
 
 socket.on(JOIN_GAME, ({ message, numPlayers }) => {
