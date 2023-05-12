@@ -5,8 +5,9 @@ const User = {};
 const SALT_ROUNDS = 10;
 
 User.signin = async (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
   const oldUsername = req.body.username;
+  const email = req.body.emailAddress;
 
   try {
     const {
@@ -37,7 +38,9 @@ User.signin = async (req, res) => {
 };
 
 User.register = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, password } = req.body;
+  const email = req.body.emailAddress;
+  console.log(email);
 
   if (
     !username ||
@@ -55,7 +58,8 @@ User.register = async (req, res) => {
   const hash = await bcrypt.hash(password, salt);
 
   try {
-    const id = await Users.create(username, email, hash);
+    const result = await Users.create(username, email, hash);
+    const id = result.id;
 
     req.session.user = {
       id,

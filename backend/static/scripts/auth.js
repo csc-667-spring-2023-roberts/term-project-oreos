@@ -7,7 +7,7 @@ const showMessageAuth = (data) => {
 };
 
 const register = async () => {
-  const form = document.getElementById("register-form-id");
+  const form = document.getElementById("signin-form-id");
   const formData = new FormData(form);
   const formDataJson = {};
 
