@@ -77,8 +77,9 @@ Game.createGame = async (req, res) => {
 };
 
 Game.startGame = async (req, res) => {
-  const { game_id, user_id } = req.body;
   const io = req.app.get("io");
+
+  const { game_id, user_id } = req.body;
   const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
 
   try {
@@ -94,13 +95,11 @@ Game.startGame = async (req, res) => {
       return;
     }
 
-    let isOngoingGame = await Games.isGameStarted(game_id);
-    isOngoingGame = isOngoingGame?.ongoing || false;
+    let isPlayerExist = await Games.isPlayerExist(user_id, game_id);
+    isPlayerExist = isPlayerExist?.user_id || null;
 
-    let isPlayerOngoing = await Games.isPlayerStarted(user_id, game_id);
-    isPlayerOngoing = isPlayerOngoing?.ongoing || false;
-
-    if (isOngoingGame && isPlayerOngoing) {
+    if (isPlayerExist) {
+      console.log("plauer exist");
       const userCards = await Games.getAllUserCards(user_id, game_id);
       const gameState = await Games.getGameState(game_id);
 
@@ -138,6 +137,8 @@ Game.startGame = async (req, res) => {
         players.push(playerInfo);
       }
 
+      console.log(players);
+
       top_deck = gameState.top_deck + ".png";
       top_discard = gameState.top_discard + ".png";
 
@@ -150,9 +151,7 @@ Game.startGame = async (req, res) => {
       res.send({
         message: "Game already started",
         status: 200,
-        ongoing: isOngoingGame,
         playerInfo: playerInfo,
-        players,
       });
       return;
     }
@@ -177,13 +176,12 @@ Game.startGame = async (req, res) => {
 
     let cardsArr = await getCards();
     let cards = shuffleCards(cardsArr);
-    const player = {
+    const playerInfo = {
       name: req.session.user?.username,
       user_id: user_id,
       hand: [],
     };
 
-    player.hand = [];
     await Games.createGameUser(game_id, user_id, true, 0);
 
     const cardsInHand = 7;
@@ -192,14 +190,25 @@ Game.startGame = async (req, res) => {
       const card_id = poppedCard.id;
       const card_name = poppedCard.name;
       await Games.createUserCard(game_id, user_id, card_id);
-      player.hand.push(card_name);
+      playerInfo.hand.push(card_name);
     }
-
-    let playerInfo = player;
     let ongoingUpdated = await Games.setGameOngoing(true, game_id);
 
     ongoingUpdated = ongoingUpdated?.ongoing || false;
-    players.push(player);
+
+    let foundExistingPlayer = false;
+
+    for (let i = 0; i < players.length; i++) {
+      if (players[i].user_id === user_id) {
+        foundExistingPlayer = true;
+        players[i].hand = playerInfo.hand;
+        break;
+      }
+    }
+
+    if (!foundExistingPlayer) {
+      players.push(playerInfo);
+    }
 
     io.in(game_id).emit(START_GAME, {
       top_deck,
@@ -212,7 +221,6 @@ Game.startGame = async (req, res) => {
       playersCount: numPlayers,
       playerInfo: playerInfo,
       ongoingUpdated: ongoingUpdated,
-      players,
       status: 200,
     });
   } catch (err) {
@@ -354,14 +362,21 @@ Game.getAllMessages = async (req, res) => {
   }
 };
 
-Game.saveGameState = async (req, res) => {
-  // TODO implement
-  res.send({ message: "Game state saved" });
+const saveGameState = async (game_id, top_deck, top_discard, position) => {
+  try {
+    await Games.saveGameState(game_id, top_deck, top_discard, position);
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-Game.getGameState = async (req, res) => {
-  // TODO implement
-  res.send({ message: "Game state retrieved" });
+const getGameState = async (game_id) => {
+  try {
+    return await Games.getGameState(game_id);
+  } catch (err) {
+    console.log(err);
+    return {};
+  }
 };
 
 module.exports = Game;

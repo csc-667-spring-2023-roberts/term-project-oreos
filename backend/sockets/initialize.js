@@ -13,10 +13,11 @@ const initSockets = (app, sessionMiddleware) => {
 
     _socket.on(JOIN_GAME, ({ game_id, user }) => {
       _socket.join(game_id);
-      const username = user ? user.username : "null";
+      const username = user?.username;
+      const user_id = user?.id;
       const message = username + " joined room: " + game_id;
-
-      // store player in database after joined game
+      _socket.username = username;
+      _socket.user_id = user_id;
 
       const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
       io.in(game_id).emit(JOIN_GAME, { message, numPlayers });

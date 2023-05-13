@@ -247,16 +247,6 @@ const callUno = () => {
   console.log("called uno");
 };
 
-const saveGameState = () => {
-  //TODO implement
-  console.log("game state saved");
-};
-
-const getGameState = () => {
-  //TODO implement
-  console.log("get game state");
-};
-
 const endGame = () => {
   //TODO implement
   console.log("game ended");

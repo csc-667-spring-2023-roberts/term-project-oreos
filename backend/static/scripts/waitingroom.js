@@ -17,9 +17,6 @@ const getGameId = (location) => {
 };
 
 const isOnGoingGame = async () => {
-  // get game session to see if it is ongoing
-  // if so then redirect joining player to that game
-  // fetch gamestate in backend
   const game_id = getGameId(document.location.pathname);
   let isOnGoing = false;
 

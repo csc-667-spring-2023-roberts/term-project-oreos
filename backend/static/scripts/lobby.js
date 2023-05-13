@@ -94,7 +94,6 @@ const getAllMessages = async () => {
     const messageArray = data.messageArray;
 
     if (data.status === 400 || data.status === 500) {
-      showMessage(data);
       return;
     }
 

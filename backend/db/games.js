@@ -37,10 +37,10 @@ const setGameOngoing = async (ongoing, game_id) => {
   );
 };
 
-const saveGameState = async (top_deck, top_discard, position) => {
+const saveGameState = async (game_id, top_deck, top_discard, position) => {
   return await db.oneOrNone(
-    "UPDATE games set top_deck=$1, top_discard=$2, position=$3 RETURNING *",
-    [top_deck, top_discard, position]
+    "UPDATE games set game_id=$1, top_deck=$2, top_discard=$3, position=$4 RETURNING *",
+    [game_id, top_deck, top_discard, position]
   );
 };
 
@@ -73,6 +73,13 @@ const isPlayerStarted = async (user_id, game_id) => {
   );
 };
 
+const isPlayerExist = async (user_id, game_id) => {
+  return await db.oneOrNone(
+    "SELECT user_id FROM game_users WHERE user_id=$1 AND game_id=$2",
+    [user_id, game_id]
+  );
+};
+
 const createUserCard = async (game_id, user_id, card_id) => {
   return await db.oneOrNone(
     "INSERT INTO user_cards (game_id, user_id, card_id) VALUES ($1, $2, $3) RETURNING card_id",
@@ -93,4 +100,5 @@ module.exports = {
   createGameUser,
   createUserCard,
   isPlayerStarted,
+  isPlayerExist,
 };
