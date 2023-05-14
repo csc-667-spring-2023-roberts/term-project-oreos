@@ -1,6 +1,6 @@
 const http = require("http");
 const { Server } = require("socket.io");
-const { JOIN_GAME } = require("./constants.js");
+const { JOIN_GAME, LEAVE_GAME } = require("./constants.js");
 
 const initSockets = (app, sessionMiddleware) => {
   const server = http.createServer(app);

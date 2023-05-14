@@ -1,6 +1,7 @@
 console.log("Hello from a bundled  assetsss.");
 import io from "socket.io-client";
 import { getGameId } from "./get-game-id";
+import { showMessage } from "./show-alert-message";
 import {
   CHAT,
   JOIN_GAME,
@@ -13,7 +14,7 @@ import {
 
 const socket = io();
 const game_id = getGameId(document.location.pathname);
-
+const imgPath = "../images/";
 const user = JSON.parse(localStorage.getItem("user"));
 
 socket.emit(JOIN_GAME, { game_id, user });
@@ -47,8 +48,6 @@ socket.on(CHAT, ({ message, username }) => {
 });
 
 socket.on(START_GAME, ({ top_deck, top_discard, players }) => {
-  const imgPath = "../images/";
-
   if (
     !document.getElementById("deck-img-id") ||
     !document.getElementById("discard-img-id")
@@ -96,14 +95,14 @@ socket.on(JOIN_GAME, ({ message, numPlayers }) => {
     document.getElementById("num-of-players-id").innerText =
       "Number of Players: " + numPlayers;
   }
+
+  showMessage(message);
 });
 
 socket.on(PLAY_CARD, ({ card_id, game_id, user_id, top_discard }) => {
-  const imgPath = "../images/";
   document.getElementById("discard-img-id").src = imgPath + top_discard;
 });
 
 socket.on(DRAW_CARD, ({ card_id, game_id, user_id, discardPile, top_deck }) => {
-  const imgPath = "../images/";
   document.getElementById("deck-img-id").src = imgPath + top_deck;
 });

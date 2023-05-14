@@ -12,6 +12,7 @@ const Games = require("../db/games.js");
 let top_deck = "";
 let top_discard = "";
 let players = [];
+let hostPlayer = {};
 
 const shuffleCards = (cards) => {
   let temp = null;
@@ -77,12 +78,13 @@ Game.createGame = async (req, res) => {
 };
 
 Game.startGame = async (req, res) => {
-  const io = req.app.get("io");
-
   const { game_id, user_id } = req.body;
-  const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
 
   try {
+    const io = req.app.get("io");
+
+    const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
+
     let users_required = await Games.getNumberOfPlayers(game_id);
     users_required = users_required?.users_required || 2;
 
@@ -99,7 +101,6 @@ Game.startGame = async (req, res) => {
     isPlayerExist = isPlayerExist?.user_id || null;
 
     if (isPlayerExist) {
-      console.log("plauer exist");
       const userCards = await Games.getAllUserCards(user_id, game_id);
       const gameState = await Games.getGameState(game_id);
 
@@ -152,6 +153,7 @@ Game.startGame = async (req, res) => {
         message: "Game already started",
         status: 200,
         playerInfo: playerInfo,
+        hostPlayer: hostPlayer,
       });
       return;
     }
@@ -220,6 +222,7 @@ Game.startGame = async (req, res) => {
       message: "Game started",
       playersCount: numPlayers,
       playerInfo: playerInfo,
+      hostPlayer: hostPlayer,
       ongoingUpdated: ongoingUpdated,
       status: 200,
     });

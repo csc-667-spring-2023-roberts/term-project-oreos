@@ -1,4 +1,8 @@
 const showMessageAuth = (data) => {
+  if (!document.getElementById("msg-id")) {
+    return;
+  }
+
   document.getElementById("msg-id").innerText = data.message;
 
   setTimeout(() => {
