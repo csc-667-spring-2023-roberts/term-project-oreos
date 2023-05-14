@@ -40,6 +40,7 @@ User.signin = async (req, res) => {
 User.register = async (req, res) => {
   const { username, password } = req.body;
   const email = req.body.emailAddress;
+  console.log(req.body);
 
   if (
     !username ||
@@ -57,6 +58,12 @@ User.register = async (req, res) => {
   const hash = await bcrypt.hash(password, salt);
 
   try {
+    const oldUser = await Users.findByEmailOrUsername(email, username);
+    if (oldUser?.email) {
+      res.send({ message: "Error signing up", status: 400 });
+      return;
+    }
+
     const result = await Users.create(username, email, hash);
     const id = result.id;
 
