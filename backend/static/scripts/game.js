@@ -14,6 +14,20 @@ const showMessage = (data) => {
   }, 5000);
 };
 
+const showUnoCallButton = () => {
+  const unoButton = document.createElement("button");
+  unoButton.innerHTML = "Call UNO";
+  unoButton.onclick = function () {
+    callUno();
+  };
+  unoButton.id = "uno-button-id";
+  document.getElementById("call-uno-container-id").appendChild(unoButton);
+
+  setTimeout(() => {
+    document.getElementById("uno-button-id").remove();
+  }, 5000);
+};
+
 const getUserSession = async () => {
   try {
     const res = await fetch("/api/users/user-session");
@@ -183,6 +197,11 @@ const playCard = async (cardName) => {
     const res = await fetch(`/api/games/${game_id}/play`, options);
     const data = await res.json();
     playerInfo = data.playerInfo;
+    console.log(playerInfo.hand.length);
+
+    if (playerInfo.hand.length === 1) {
+      showUnoCallButton();
+    }
 
     if (data.status === 400 || data.status === 500) {
       showMessage(data);
@@ -246,9 +265,31 @@ const drawCard = async () => {
   }
 };
 
-const callUno = () => {
-  //TODO implement
-  console.log("called uno");
+const callUno = async () => {
+  const formDataJson = {};
+
+  const game_id = getGameId(document.location.pathname);
+  formDataJson["game_id"] = game_id;
+
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formDataJson),
+  };
+
+  try {
+    const res = await fetch(`/api/games/${game_id}/uno`, options);
+    const data = await res.json();
+
+    if (data.status === 400 || data.status === 500) {
+      showMessage(data);
+      return;
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const endGame = () => {

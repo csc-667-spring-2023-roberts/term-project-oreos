@@ -4,6 +4,7 @@ const {
   START_GAME,
   PLAY_CARD,
   DRAW_CARD,
+  CALL_UNO,
 } = require("../sockets/constants.js");
 const Game = {};
 const GAMECHAT = require("../db/gamechat.js");
@@ -253,7 +254,6 @@ Game.playCard = async (req, res) => {
       let idx = Array.from(players[i].hand.indexOf(card_id));
       players[i].hand.splice(idx, 1);
       playerInfo = players[i];
-      break;
     }
   }
 
@@ -326,8 +326,31 @@ Game.drawCard = (req, res) => {
 };
 
 Game.callUno = async (req, res) => {
-  // TODO implement
-  res.send({ message: "Call Uno" });
+  const { game_id } = req.params;
+  const userSession = req.session.user;
+
+  const username = userSession.username;
+  const user_id = userSession.id;
+
+  const io = req.app.get("io");
+
+  if (!user_id || !game_id) {
+    res.send({ message: "Bad Request", status: 400 });
+    return;
+  }
+
+  const userCards = await Games.canCallUno(+game_id, user_id);
+  console.log(userCards.length);
+
+  if (userCards.length === 1) {
+    const message = `${username} called UNO!`;
+
+    io.in(+game_id).emit(CALL_UNO, { message });
+    res.send({ message: message, status: 200 });
+    return;
+  }
+
+  res.send({ message: "Cannot call uno", status: 400 });
 };
 
 Game.sendMessage = async (req, res) => {

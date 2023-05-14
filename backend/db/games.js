@@ -87,6 +87,13 @@ const createUserCard = async (game_id, user_id, card_id) => {
   );
 };
 
+const canCallUno = async (game_id, user_id) => {
+  return await db.manyOrNone(
+    "SELECT * FROM user_cards WHERE game_id=$1 AND user_id=$2",
+    [game_id, user_id]
+  );
+};
+
 module.exports = {
   create,
   getAll,
@@ -101,4 +108,5 @@ module.exports = {
   createUserCard,
   isPlayerStarted,
   isPlayerExist,
+  canCallUno,
 };
