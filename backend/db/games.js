@@ -59,7 +59,14 @@ const getAllUserCards = async (user_id, game_id) => {
   );
 };
 
-const createGameUser = async (game_id, user_id, ongoing, turn) => {
+const createGameUser = async (game_id, user_id, ongoing) => {
+  const { max_turn } = await db.one(
+    "SELECT COALESCE(MAX(turn), -1) + 1 as max_turn FROM game_users WHERE game_id = $1",
+    game_id
+  );
+
+  const turn = max_turn !== null ? parseInt(max_turn) : 0;
+
   return await db.oneOrNone(
     "INSERT INTO game_users (game_id, user_id, ongoing, turn) VALUES ($1, $2, $3, $4) RETURNING *",
     [game_id, user_id, ongoing, turn]
