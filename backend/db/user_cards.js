@@ -22,12 +22,12 @@ const playCard = async (game_id, user_id, card_id) => {
 };
 
 const findCardID = async (card_color, card_number) => {
-  const result = await db.one(
+  const result = await db.any(
     "SELECT card_id FROM cards WHERE card_color = $1 AND card_number = $2",
     [card_color, card_number]
   );
 
-  return parseInt(result.card_id);
+  return parseInt(result[0].card_id);
 };
 
 
