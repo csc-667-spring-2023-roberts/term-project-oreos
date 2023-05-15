@@ -52,18 +52,18 @@ const getCardID = (str) => {
     return [firstInteger, secondInteger];
   }
 
-  return null; // Return null if the string format doesn't match
+  return null; 
 }
 
 const getRandomCard = () => {
   let color, number;
 
   do {
-    color = Math.floor(Math.random() * 5); // Generate a random number between 0 and 4 (inclusive) for 'a'
-    number = Math.floor(Math.random() * 15); // Generate a random number between 0 and 14 (inclusive) for 'b'
+    color = Math.floor(Math.random() * 5); 
+    number = Math.floor(Math.random() * 15); 
   } while (
-    (number >= 13 && color < 4) || // If 'b' is 13 or 14 and 'a' is less than 4
-    (number < 13 && (color === 3 || color === 4)) // If 'b' is less than 13 and 'a' is 3 or 4
+    (number >= 13 && color < 4) || 
+    (number < 13 && (color === 3 || color === 4)) 
   );
 
   return [color, number];
