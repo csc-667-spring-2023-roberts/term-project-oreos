@@ -39,7 +39,7 @@ const setGameOngoing = async (ongoing, game_id) => {
 
 const saveGameState = async (game_id, top_deck, top_discard, position) => {
   return await db.oneOrNone(
-    "UPDATE games set game_id=$1, top_deck=$2, top_discard=$3, position=$4 RETURNING *",
+    "UPDATE games set top_deck=$2, top_discard=$3, position=$4 WHERE id=$1 RETURNING *",
     [game_id, top_deck, top_discard, position]
   );
 };

@@ -140,8 +140,6 @@ Game.startGame = async (req, res) => {
         players.push(playerInfo);
       }
 
-      console.log(players);
-
       top_deck = gameState.top_deck + ".png";
       top_discard = gameState.top_discard + ".png";
 
@@ -341,7 +339,6 @@ Game.callUno = async (req, res) => {
   }
 
   const userCards = await Games.canCallUno(+game_id, user_id);
-  console.log(userCards.length);
 
   if (userCards.length === 1) {
     const message = `${username} called UNO!`;
@@ -393,7 +390,12 @@ Game.saveGameState = async (req, res) => {
   const { game_id } = req.params;
 
   try {
-    await Games.saveGameState(game_id, top_deck, top_discard, position);
+    await Games.saveGameState(
+      game_id,
+      top_deck.split(".")[0],
+      top_discard.split(".")[0],
+      position
+    );
     res.send({ message: "Game session saved", status: 200 });
   } catch (err) {
     console.log(err);
