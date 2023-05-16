@@ -9,6 +9,7 @@ const {
 const Game = {};
 const GAMECHAT = require("../db/gamechat.js");
 const Games = require("../db/games.js");
+const user_cards = require("../db/user_cards.js");
 
 let top_deck = "";
 let top_discard = "";
@@ -40,6 +41,33 @@ const getCards = async () => {
   }
 
   return cardsArr;
+};
+
+const getCardID = (str) => {
+  const regex = /^(\d+)-(\d+)\.png$/;
+  const match = str.match(regex);
+
+  if (match) {
+    const firstInteger = parseInt(match[1]);
+    const secondInteger = parseInt(match[2]);
+    return [firstInteger, secondInteger];
+  }
+
+  return null;
+};
+
+const getRandomCard = () => {
+  let color, number;
+
+  do {
+    color = Math.floor(Math.random() * 5);
+    number = Math.floor(Math.random() * 15);
+  } while (
+    (number >= 13 && color < 4) ||
+    (number < 13 && (color === 3 || color === 4))
+  );
+
+  return [color, number];
 };
 
 Game.createGame = async (req, res) => {
@@ -266,7 +294,7 @@ Game.playCard = async (req, res) => {
   });
 };
 
-Game.drawCard = (req, res) => {
+Game.drawCard = async (req, res) => {
   // make sure user is in the game
   // make sure player turn
 
@@ -296,6 +324,14 @@ Game.drawCard = (req, res) => {
       playerInfoNewCards.hand?.push(card);
     }
 
+    io.in(game_id).emit(DRAW_CARD, {
+      game_id,
+      user_id,
+      top_discard,
+      top_deck,
+      players,
+    });
+
     res.send({
       message: "Drawn two cards",
       playerInfo: playerInfo,
@@ -309,11 +345,22 @@ Game.drawCard = (req, res) => {
   const card = top_deck;
   playerInfo.hand?.push(card);
   playerInfoNewCards.hand?.push(card);
+  //find card ID before sending to db
+  const cardID_arr = getCardID(card);
+  const card_id = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
+  await user_cards.drawCard(game_id, user_id, card_id);
 
   //todo: placeholder, update top deck to a random card from db after player draws current card it
-  top_deck = "2-5.png";
+  const top_deck_arr = getRandomCard();
+  top_deck = `${top_deck_arr[0]}-${top_deck_arr[1]}.png`;
 
-  io.in(game_id).emit(DRAW_CARD, { game_id, user_id, top_discard, top_deck });
+  io.in(game_id).emit(DRAW_CARD, {
+    game_id,
+    user_id,
+    top_discard,
+    top_deck,
+    players,
+  });
 
   res.send({
     message: "Drawn card: " + card,
