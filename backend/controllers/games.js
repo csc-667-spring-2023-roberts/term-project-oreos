@@ -191,7 +191,7 @@ Game.startGame = async (req, res) => {
       const poppedCard = cards.pop();
       const card_id = poppedCard.id;
       const card_name = poppedCard.name;
-      await Games.createUserCard(game_id, user_id, card_id);
+      await Games.createPlayerCard(game_id, user_id, card_id);
       playerInfo.hand.push(card_name);
     }
     let ongoingUpdated = await Games.setGameOngoing(true, game_id);
@@ -338,7 +338,7 @@ Game.callUno = async (req, res) => {
     return;
   }
 
-  const userCards = await Games.canCallUno(+game_id, user_id);
+  const userCards = await Games.getPlayerCards(+game_id, user_id);
 
   if (userCards.length === 1) {
     const message = `${username} called UNO!`;
