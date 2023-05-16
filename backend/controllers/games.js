@@ -107,6 +107,22 @@ Game.createGame = async (req, res) => {
   });
 };
 
+const handleExistingPlayer = (playerInfo, user_id) => {
+  let foundExistingPlayer = false;
+
+  for (let i = 0; i < players.length; i++) {
+    if (players[i].user_id === user_id) {
+      foundExistingPlayer = true;
+      players[i].hand = playerInfo.hand;
+      break;
+    }
+  }
+
+  if (!foundExistingPlayer) {
+    players.push(playerInfo);
+  }
+};
+
 Game.startGame = async (req, res) => {
   const { game_id, user_id } = req.body;
 
@@ -130,9 +146,12 @@ Game.startGame = async (req, res) => {
     let isPlayerExist = await Games.isPlayerExist(user_id, game_id);
     isPlayerExist = isPlayerExist?.user_id || null;
 
+    const gameState = await Games.getGameState(game_id);
+    top_deck = gameState.top_deck + ".png";
+    top_discard = gameState.top_discard + ".png";
+
     if (isPlayerExist) {
       const userCards = await Games.getAllUserCards(user_id, game_id);
-      const gameState = await Games.getGameState(game_id);
 
       const userCardsObj = {};
       userCards.forEach((elem) => {
@@ -154,22 +173,7 @@ Game.startGame = async (req, res) => {
         }
       });
 
-      let foundExistingPlayer = false;
-
-      for (let i = 0; i < players.length; i++) {
-        if (players[i].user_id === user_id) {
-          foundExistingPlayer = true;
-          players[i].hand = playerInfo.hand;
-          break;
-        }
-      }
-
-      if (!foundExistingPlayer) {
-        players.push(playerInfo);
-      }
-
-      top_deck = gameState.top_deck + ".png";
-      top_discard = gameState.top_discard + ".png";
+      handleExistingPlayer(playerInfo, user_id);
 
       io.in(game_id).emit(START_GAME, {
         top_deck,
@@ -183,24 +187,6 @@ Game.startGame = async (req, res) => {
         playerInfo: playerInfo,
         hostPlayer: hostPlayer,
       });
-      return;
-    }
-
-    if (numPlayers < users_required) {
-      res.send({
-        url: `/lobby`,
-        message: `Need at least ${users_required} players`,
-        status: 400,
-      });
-      return;
-    }
-
-    const gameState = await Games.getGameState(game_id);
-    top_deck = gameState.top_deck + ".png";
-    top_discard = gameState.top_discard + ".png";
-
-    if (!io.sockets.adapter.rooms.get(+game_id)) {
-      res.send({ message: "An error occured", status: 500 });
       return;
     }
 
@@ -226,19 +212,7 @@ Game.startGame = async (req, res) => {
 
     ongoingUpdated = ongoingUpdated?.ongoing || false;
 
-    let foundExistingPlayer = false;
-
-    for (let i = 0; i < players.length; i++) {
-      if (players[i].user_id === user_id) {
-        foundExistingPlayer = true;
-        players[i].hand = playerInfo.hand;
-        break;
-      }
-    }
-
-    if (!foundExistingPlayer) {
-      players.push(playerInfo);
-    }
+    handleExistingPlayer(playerInfo, user_id);
 
     io.in(game_id).emit(START_GAME, {
       top_deck,
@@ -295,9 +269,6 @@ Game.playCard = async (req, res) => {
 };
 
 Game.drawCard = async (req, res) => {
-  // make sure user is in the game
-  // make sure player turn
-
   const { game_id, user_id } = req.body;
   const io = req.app.get("io");
 
@@ -319,10 +290,18 @@ Game.drawCard = async (req, res) => {
   // penalty did not call uno
   if (playerInfo.hand?.length === 1) {
     for (let i = 0; i < 2; i++) {
-      const card = top_deck;
-      playerInfo.hand?.push(card);
-      playerInfoNewCards.hand?.push(card);
+      playerInfo.hand?.push(top_deck);
+      playerInfoNewCards.hand?.push(top_deck);
+      const top_deck_arr = getRandomCard();
+      top_deck = `${top_deck_arr[0]}-${top_deck_arr[1]}.png`;
     }
+
+    await Games.saveGameState(
+      game_id,
+      top_deck.split(".")[0],
+      top_discard.split(".")[0],
+      position
+    );
 
     io.in(game_id).emit(DRAW_CARD, {
       game_id,
@@ -350,9 +329,15 @@ Game.drawCard = async (req, res) => {
   const card_id = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
   await user_cards.drawCard(game_id, user_id, card_id);
 
-  //todo: placeholder, update top deck to a random card from db after player draws current card it
   const top_deck_arr = getRandomCard();
   top_deck = `${top_deck_arr[0]}-${top_deck_arr[1]}.png`;
+
+  await Games.saveGameState(
+    game_id,
+    top_deck.split(".")[0],
+    top_discard.split(".")[0],
+    position
+  );
 
   io.in(game_id).emit(DRAW_CARD, {
     game_id,
@@ -447,15 +432,6 @@ Game.saveGameState = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.send({ message: "Error, cannot save game session", status: 500 });
-  }
-};
-
-const getGameState = async (game_id) => {
-  try {
-    return await Games.getGameState(game_id);
-  } catch (err) {
-    console.log(err);
-    return {};
   }
 };
 

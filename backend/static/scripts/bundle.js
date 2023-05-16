@@ -91,11 +91,11 @@
           var h;
         },
         c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
-        u = "undefined" == typeof Uint8Array ? [] : new Uint8Array(256);
-      for (let t = 0; t < c.length; t++) u[c.charCodeAt(t)] = t;
-      const p = "function" == typeof ArrayBuffer,
+        p = "undefined" == typeof Uint8Array ? [] : new Uint8Array(256);
+      for (let t = 0; t < c.length; t++) p[c.charCodeAt(t)] = t;
+      const u = "function" == typeof ArrayBuffer,
         d = (t, e) => {
-          if (p) {
+          if (u) {
             const s = ((t) => {
               let e,
                 s,
@@ -107,15 +107,15 @@
                 h = 0;
               "=" === t[t.length - 1] && (o--, "=" === t[t.length - 2] && o--);
               const c = new ArrayBuffer(o),
-                p = new Uint8Array(c);
+                u = new Uint8Array(c);
               for (e = 0; e < a; e += 4)
-                (s = u[t.charCodeAt(e)]),
-                  (n = u[t.charCodeAt(e + 1)]),
-                  (i = u[t.charCodeAt(e + 2)]),
-                  (r = u[t.charCodeAt(e + 3)]),
-                  (p[h++] = (s << 2) | (n >> 4)),
-                  (p[h++] = ((15 & n) << 4) | (i >> 2)),
-                  (p[h++] = ((3 & i) << 6) | (63 & r));
+                (s = p[t.charCodeAt(e)]),
+                  (n = p[t.charCodeAt(e + 1)]),
+                  (i = p[t.charCodeAt(e + 2)]),
+                  (r = p[t.charCodeAt(e + 3)]),
+                  (u[h++] = (s << 2) | (n >> 4)),
+                  (u[h++] = ((15 & n) << 4) | (i >> 2)),
+                  (u[h++] = ((3 & i) << 6) | (63 & r));
               return c;
             })(t);
             return l(s, e);
@@ -1385,7 +1385,7 @@
           (this.reconPack = null), (this.buffers = []);
         }
       }
-      function ut(t, e, s) {
+      function pt(t, e, s) {
         return (
           t.on(e, s),
           function () {
@@ -1393,7 +1393,7 @@
           }
         );
       }
-      const pt = Object.freeze({
+      const ut = Object.freeze({
         connect: 1,
         connect_error: 1,
         disconnect: 1,
@@ -1426,10 +1426,10 @@
           if (this.subs) return;
           const t = this.io;
           this.subs = [
-            ut(t, "open", this.onopen.bind(this)),
-            ut(t, "packet", this.onpacket.bind(this)),
-            ut(t, "error", this.onerror.bind(this)),
-            ut(t, "close", this.onclose.bind(this)),
+            pt(t, "open", this.onopen.bind(this)),
+            pt(t, "packet", this.onpacket.bind(this)),
+            pt(t, "error", this.onerror.bind(this)),
+            pt(t, "close", this.onclose.bind(this)),
           ];
         }
         get active() {
@@ -1451,7 +1451,7 @@
           return t.unshift("message"), this.emit.apply(this, t), this;
         }
         emit(t, ...e) {
-          if (pt.hasOwnProperty(t))
+          if (ut.hasOwnProperty(t))
             throw new Error('"' + t.toString() + '" is a reserved event name');
           if (
             (e.unshift(t),
@@ -1836,10 +1836,10 @@
           const e = this.engine,
             s = this;
           (this._readyState = "opening"), (this.skipReconnect = !1);
-          const n = ut(e, "open", function () {
+          const n = pt(e, "open", function () {
               s.onopen(), t && t();
             }),
-            i = ut(e, "error", (e) => {
+            i = pt(e, "error", (e) => {
               s.cleanup(),
                 (s._readyState = "closed"),
                 this.emitReserved("error", e),
@@ -1867,11 +1867,11 @@
             this.emitReserved("open");
           const t = this.engine;
           this.subs.push(
-            ut(t, "ping", this.onping.bind(this)),
-            ut(t, "data", this.ondata.bind(this)),
-            ut(t, "error", this.onerror.bind(this)),
-            ut(t, "close", this.onclose.bind(this)),
-            ut(this.decoder, "decoded", this.ondecoded.bind(this))
+            pt(t, "ping", this.onping.bind(this)),
+            pt(t, "data", this.ondata.bind(this)),
+            pt(t, "error", this.onerror.bind(this)),
+            pt(t, "close", this.onclose.bind(this)),
+            pt(this.decoder, "decoded", this.ondecoded.bind(this))
           );
         }
         onping() {
@@ -2037,37 +2037,37 @@
           if (!s) return;
           let n = document.createElement("li");
           (n.innerHTML = `${e}: ${t}`), s.appendChild(n);
-        }),
-        bt.on(gt.START_GAME, ({ top_deck: t, top_discard: e, players: s }) => {
-          if (
-            !document.getElementById("deck-img-id") ||
-            !document.getElementById("discard-img-id")
-          )
-            return;
-          (document.getElementById("deck-img-id").src = _t + t),
-            (document.getElementById("discard-img-id").src = _t + e);
-          const n = document.getElementById("opponents-hand-parent-id");
-          (n.innerHTML = ""),
-            s.forEach((t) => {
-              if (Et.id !== t.user_id) {
-                let e = document.createElement("div");
-                (e.innerHTML = ""), (e.id = "opponent-hand-id");
-                const s = document.createElement("p");
-                (s.innerText = t.name),
-                  t.hand.forEach((s) => {
-                    const n = document.createElement("img");
-                    n.setAttribute("src", `${_t}back.png`),
-                      (n.id = s + "-id"),
-                      n.setAttribute("class", `${t.name}`),
-                      n.setAttribute("width", "100px"),
-                      n.setAttribute("height", "100px"),
-                      e.appendChild(n);
-                  }),
-                  n.appendChild(s),
-                  n.appendChild(e);
-              }
-            });
-        }),
+        });
+      const kt = (t) => {
+        const e = document.getElementById("opponents-hand-parent-id");
+        (e.innerHTML = ""),
+          t.forEach((t) => {
+            if (Et.id !== t.user_id) {
+              let s = document.createElement("div");
+              (s.innerHTML = ""), (s.id = "opponent-hand-id");
+              const n = document.createElement("p");
+              (n.innerText = t.name),
+                t.hand.forEach((e) => {
+                  const n = document.createElement("img");
+                  n.setAttribute("src", `${_t}back.png`),
+                    (n.id = e + "-id"),
+                    n.setAttribute("class", `${t.name}`),
+                    n.setAttribute("width", "100px"),
+                    n.setAttribute("height", "100px"),
+                    s.appendChild(n);
+                }),
+                e.appendChild(n),
+                e.appendChild(s);
+            }
+          });
+      };
+      bt.on(gt.START_GAME, ({ top_deck: t, top_discard: e, players: s }) => {
+        document.getElementById("deck-img-id") &&
+          document.getElementById("discard-img-id") &&
+          ((document.getElementById("deck-img-id").src = _t + t),
+          (document.getElementById("discard-img-id").src = _t + e),
+          kt(s));
+      }),
         bt.on(gt.JOIN_GAME, ({ message: t, numPlayers: e }) => {
           document.getElementById("num-of-players-id") &&
             (vt &&
@@ -2096,8 +2096,9 @@
             user_id: s,
             discardPile: n,
             top_deck: i,
+            players: r,
           }) => {
-            document.getElementById("deck-img-id").src = _t + i;
+            (document.getElementById("deck-img-id").src = _t + i), kt(r);
           }
         ),
         bt.on(gt.CALL_UNO, ({ message: t }) => {
