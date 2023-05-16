@@ -39,7 +39,7 @@ const setGameOngoing = async (ongoing, game_id) => {
 
 const saveGameState = async (game_id, top_deck, top_discard, position) => {
   return await db.oneOrNone(
-    "UPDATE games set game_id=$1, top_deck=$2, top_discard=$3, position=$4 RETURNING *",
+    "UPDATE games set top_deck=$2, top_discard=$3, position=$4 WHERE id=$1 RETURNING *",
     [game_id, top_deck, top_discard, position]
   );
 };
@@ -59,7 +59,14 @@ const getAllUserCards = async (user_id, game_id) => {
   );
 };
 
-const createGameUser = async (game_id, user_id, ongoing, turn) => {
+const createGameUser = async (game_id, user_id, ongoing) => {
+  const { max_turn } = await db.one(
+    "SELECT COALESCE(MAX(turn), -1) + 1 as max_turn FROM game_users WHERE game_id = $1",
+    game_id
+  );
+
+  const turn = max_turn !== null ? parseInt(max_turn) : 0;
+
   return await db.oneOrNone(
     "INSERT INTO game_users (game_id, user_id, ongoing, turn) VALUES ($1, $2, $3, $4) RETURNING *",
     [game_id, user_id, ongoing, turn]
@@ -80,14 +87,14 @@ const isPlayerExist = async (user_id, game_id) => {
   );
 };
 
-const createUserCard = async (game_id, user_id, card_id) => {
+const createPlayerCard = async (game_id, user_id, card_id) => {
   return await db.oneOrNone(
     "INSERT INTO user_cards (game_id, user_id, card_id) VALUES ($1, $2, $3) RETURNING card_id",
     [game_id, user_id, card_id]
   );
 };
 
-const canCallUno = async (game_id, user_id) => {
+const getPlayerCards = async (game_id, user_id) => {
   return await db.manyOrNone(
     "SELECT * FROM user_cards WHERE game_id=$1 AND user_id=$2",
     [game_id, user_id]
@@ -105,8 +112,8 @@ module.exports = {
   getAllCards,
   getAllUserCards,
   createGameUser,
-  createUserCard,
+  createPlayerCard,
   isPlayerStarted,
   isPlayerExist,
-  canCallUno,
+  getPlayerCards,
 };

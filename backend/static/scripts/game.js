@@ -292,6 +292,34 @@ const callUno = async () => {
   }
 };
 
+const saveGameState = async () => {
+  const formDataJson = {};
+
+  const game_id = getGameId(document.location.pathname);
+  formDataJson["game_id"] = game_id;
+
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formDataJson),
+  };
+
+  try {
+    const res = await fetch(`/api/games/${game_id}/state`, options);
+    const data = await res.json();
+    window.location.href = "/lobby";
+
+    if (data.status === 400 || data.status === 500) {
+      showMessage(data);
+      return;
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const endGame = () => {
   //TODO implement
   console.log("game ended");

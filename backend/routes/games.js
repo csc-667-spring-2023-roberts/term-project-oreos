@@ -8,6 +8,7 @@ const {
   callUno,
   sendMessage,
   getAllMessages,
+  saveGameState,
 } = require("../controllers/games.js");
 
 const {
@@ -30,5 +31,6 @@ router.put("/:game_id/uno", isAuthenticated, callUno);
 router.post("/:game_id/chat", isAuthenticated, sendMessage);
 router.get("/:game_id/chat", isAuthenticated, getAllMessages);
 router.get("/all-games", isAuthenticated, getAllGames);
+router.put("/:game_id/state", isAuthenticated, saveGameState);
 
 module.exports = router;

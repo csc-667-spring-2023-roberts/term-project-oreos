@@ -13,6 +13,7 @@ const user_cards = require("../db/user_cards.js");
 
 let top_deck = "";
 let top_discard = "";
+let position = 0;
 let players = [];
 let hostPlayer = {};
 
@@ -167,8 +168,6 @@ Game.startGame = async (req, res) => {
         players.push(playerInfo);
       }
 
-      console.log(players);
-
       top_deck = gameState.top_deck + ".png";
       top_discard = gameState.top_discard + ".png";
 
@@ -213,14 +212,14 @@ Game.startGame = async (req, res) => {
       hand: [],
     };
 
-    await Games.createGameUser(game_id, user_id, true, 0);
+    await Games.createGameUser(game_id, user_id, true);
 
     const cardsInHand = 7;
     for (let i = 0; i < cardsInHand; i++) {
       const poppedCard = cards.pop();
       const card_id = poppedCard.id;
       const card_name = poppedCard.name;
-      await Games.createUserCard(game_id, user_id, card_id);
+      await Games.createPlayerCard(game_id, user_id, card_id);
       playerInfo.hand.push(card_name);
     }
     let ongoingUpdated = await Games.setGameOngoing(true, game_id);
@@ -386,8 +385,7 @@ Game.callUno = async (req, res) => {
     return;
   }
 
-  const userCards = await Games.canCallUno(+game_id, user_id);
-  console.log(userCards.length);
+  const userCards = await Games.getPlayerCards(+game_id, user_id);
 
   if (userCards.length === 1) {
     const message = `${username} called UNO!`;
@@ -435,11 +433,20 @@ Game.getAllMessages = async (req, res) => {
   }
 };
 
-const saveGameState = async (game_id, top_deck, top_discard, position) => {
+Game.saveGameState = async (req, res) => {
+  const { game_id } = req.params;
+
   try {
-    await Games.saveGameState(game_id, top_deck, top_discard, position);
+    await Games.saveGameState(
+      game_id,
+      top_deck.split(".")[0],
+      top_discard.split(".")[0],
+      position
+    );
+    res.send({ message: "Game session saved", status: 200 });
   } catch (err) {
     console.log(err);
+    res.send({ message: "Error, cannot save game session", status: 500 });
   }
 };
 
