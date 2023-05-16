@@ -52,22 +52,22 @@ const getCardID = (str) => {
     return [firstInteger, secondInteger];
   }
 
-  return null; 
-}
+  return null;
+};
 
 const getRandomCard = () => {
   let color, number;
 
   do {
-    color = Math.floor(Math.random() * 5); 
-    number = Math.floor(Math.random() * 15); 
+    color = Math.floor(Math.random() * 5);
+    number = Math.floor(Math.random() * 15);
   } while (
-    (number >= 13 && color < 4) || 
-    (number < 13 && (color === 3 || color === 4)) 
+    (number >= 13 && color < 4) ||
+    (number < 13 && (color === 3 || color === 4))
   );
 
   return [color, number];
-}
+};
 
 Game.createGame = async (req, res) => {
   const { gametitle, count, user_id } = req.body;
@@ -325,6 +325,14 @@ Game.drawCard = async (req, res) => {
       playerInfoNewCards.hand?.push(card);
     }
 
+    io.in(game_id).emit(DRAW_CARD, {
+      game_id,
+      user_id,
+      top_discard,
+      top_deck,
+      players,
+    });
+
     res.send({
       message: "Drawn two cards",
       playerInfo: playerInfo,
@@ -346,9 +354,14 @@ Game.drawCard = async (req, res) => {
   //todo: placeholder, update top deck to a random card from db after player draws current card it
   const top_deck_arr = getRandomCard();
   top_deck = `${top_deck_arr[0]}-${top_deck_arr[1]}.png`;
-  
 
-  io.in(game_id).emit(DRAW_CARD, { game_id, user_id, top_discard, top_deck });
+  io.in(game_id).emit(DRAW_CARD, {
+    game_id,
+    user_id,
+    top_discard,
+    top_deck,
+    players,
+  });
 
   res.send({
     message: "Drawn card: " + card,

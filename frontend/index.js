@@ -48,17 +48,7 @@ socket.on(CHAT, ({ message, username }) => {
   chatList.appendChild(li);
 });
 
-socket.on(START_GAME, ({ top_deck, top_discard, players }) => {
-  if (
-    !document.getElementById("deck-img-id") ||
-    !document.getElementById("discard-img-id")
-  ) {
-    return;
-  }
-
-  document.getElementById("deck-img-id").src = imgPath + top_deck;
-  document.getElementById("discard-img-id").src = imgPath + top_discard;
-
+const updateOpponentCards = (players) => {
   const parentHandUI = document.getElementById("opponents-hand-parent-id");
   parentHandUI.innerHTML = "";
 
@@ -85,6 +75,20 @@ socket.on(START_GAME, ({ top_deck, top_discard, players }) => {
       parentHandUI.appendChild(playerHandUI);
     }
   });
+};
+
+socket.on(START_GAME, ({ top_deck, top_discard, players }) => {
+  if (
+    !document.getElementById("deck-img-id") ||
+    !document.getElementById("discard-img-id")
+  ) {
+    return;
+  }
+
+  document.getElementById("deck-img-id").src = imgPath + top_deck;
+  document.getElementById("discard-img-id").src = imgPath + top_discard;
+
+  updateOpponentCards(players);
 });
 
 socket.on(JOIN_GAME, ({ message, numPlayers }) => {
@@ -104,9 +108,13 @@ socket.on(PLAY_CARD, ({ card_id, game_id, user_id, top_discard }) => {
   document.getElementById("discard-img-id").src = imgPath + top_discard;
 });
 
-socket.on(DRAW_CARD, ({ card_id, game_id, user_id, discardPile, top_deck }) => {
-  document.getElementById("deck-img-id").src = imgPath + top_deck;
-});
+socket.on(
+  DRAW_CARD,
+  ({ card_id, game_id, user_id, discardPile, top_deck, players }) => {
+    document.getElementById("deck-img-id").src = imgPath + top_deck;
+    updateOpponentCards(players);
+  }
+);
 
 socket.on(CALL_UNO, ({ message }) => {
   document.getElementById("call-uno-msg-id").innerText = message;
