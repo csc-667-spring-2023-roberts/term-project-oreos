@@ -155,6 +155,8 @@ const setTopDeckAndDiscard = async (game_id) => {
   const gameState = await Games.getGameState(game_id);
   top_deck = gameState.top_deck + ".png";
   top_discard = gameState.top_discard + ".png";
+  cardsSet.add(top_deck);
+  cardsSet.add(top_discard);
 };
 
 Game.startGame = async (req, res) => {

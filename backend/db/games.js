@@ -67,10 +67,19 @@ const createGameUser = async (game_id, user_id, ongoing) => {
 
   const turn = max_turn !== null ? parseInt(max_turn) : 0;
 
-  return await db.oneOrNone(
-    "INSERT INTO game_users (game_id, user_id, ongoing, turn) VALUES ($1, $2, $3, $4) RETURNING *",
-    [game_id, user_id, ongoing, turn]
-  );
+  return await db.tx(async (transaction) => {
+    const previousPlayer = await transaction.oneOrNone(
+      "SELECT user_id FROM game_users WHERE game_id = $1 AND turn = $2 FOR UPDATE",
+      [game_id, turn]
+    );
+
+    const nextPlayerTurn = previousPlayer ? turn + 1 : turn;
+
+    return await transaction.oneOrNone(
+      "INSERT INTO game_users (game_id, user_id, ongoing, turn) VALUES ($1, $2, $3, $4) RETURNING *",
+      [game_id, user_id, ongoing, nextPlayerTurn]
+    );
+  });
 };
 
 const isPlayerStarted = async (user_id, game_id) => {
