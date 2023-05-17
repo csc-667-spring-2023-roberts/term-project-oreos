@@ -33,3 +33,15 @@
 .chat-form-container {
   border: 2px solid white;
 }
+.message {
+  background-color: rgb(59, 245, 149);
+  margin-bottom: 1px;
+}
+
+.message > a:hover {
+  color: yellow;
+}
+
+.game-room-link:hover {
+  color: yellow;
+}

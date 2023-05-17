@@ -1,5 +1,4 @@
-
-.h1{
+.h1 {
   text-align: center;
 }
 
@@ -36,4 +35,9 @@
   width: 100px;
   margin-top: 30px;
   margin-bottom: 30px;
+}
+
+.message {
+  background-color: rgb(59, 245, 149);
+  margin-bottom: 1px;
 }

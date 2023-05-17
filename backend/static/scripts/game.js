@@ -168,8 +168,19 @@ const getAllMessages = async () => {
     chatList.innerHTML = "";
 
     messageArray.map((msg) => {
-      let li = document.createElement("li");
-      li.innerHTML = `${msg.username}: ${msg.message} ${msg.created_at}`;
+      let li = document.createElement("div");
+      li.className = "message";
+      const date = new Date(msg.created_at);
+
+      const createdAtFormatted = date.toLocaleString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      });
+
+      li.innerHTML = `${msg.username} ${createdAtFormatted}: ${msg.message}`;
       chatList.appendChild(li);
     });
   } catch (err) {

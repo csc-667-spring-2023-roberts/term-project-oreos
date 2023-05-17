@@ -31,8 +31,10 @@ socket.on(CREATE_GAME, ({ gametitle, count, user_id, game_id, ongoing }) => {
     return;
   }
 
-  let li = document.createElement("li");
-  li.innerHTML = `Title: <a href="/waitingroom/${game_id}">${gametitle}</a>, Players: ${count}, Started: ${ongoing}`;
+  let li = document.createElement("div");
+  li.style.backgroundColor = "rgb(59, 245, 149)";
+  li.style.marginBottom = "1px";
+  li.innerHTML = `Title: <a class="game-room-link" href="/waitingroom/${game_id}">${gametitle}</a>, Players: ${count}, Started: ${ongoing}`;
   gamesList.appendChild(li);
 });
 
@@ -43,8 +45,18 @@ socket.on(CHAT, ({ message, username }) => {
     return;
   }
 
-  let li = document.createElement("li");
-  li.innerHTML = `${username}: ${message}`;
+  const createdAtFormatted = new Date().toLocaleString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  });
+
+  let li = document.createElement("div");
+  li.style.backgroundColor = "rgb(59, 245, 149)";
+  li.style.marginBottom = "1px";
+  li.innerHTML = `${username} ${createdAtFormatted}: ${message}`;
   chatList.appendChild(li);
 });
 
