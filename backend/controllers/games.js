@@ -285,6 +285,10 @@ Game.playCard = async (req, res) => {
   }
 
   top_discard = card_id;
+  let cardID_arr = getCardID(card_id);
+  let playedCardIDs = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
+  await user_cards.playCard(game_id, user_id, playedCardIDs, playedCardIDs.length);
+
 
   io.in(game_id).emit(PLAY_CARD, { card_id, game_id, user_id, top_discard });
   res.send({
@@ -347,7 +351,7 @@ Game.drawCard = async (req, res) => {
   playerInfoNewCards.hand?.push(card);
   //find card ID before sending to db
   const cardID_arr = getCardID(card);
-  const card_id = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
+  let card_id = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
   await user_cards.drawCard(game_id, user_id, card_id);
 
   //todo: placeholder, update top deck to a random card from db after player draws current card it
