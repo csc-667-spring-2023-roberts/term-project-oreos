@@ -16,6 +16,7 @@ let top_discard = "";
 let position = 0;
 let players = [];
 let hostPlayer = {};
+let cardsSet = new Set();
 
 const shuffleCards = (cards) => {
   let temp = null;
@@ -87,11 +88,26 @@ Game.createGame = async (req, res) => {
   const game_title = gametitle;
   const users_required = count;
 
+  let top_deck_arr = getRandomCard();
+  top_deck = `${top_deck_arr[0]}-${top_deck_arr[1]}`;
+  let top_discard_arr = getRandomCard();
+  top_discard = `${top_discard_arr[0]}-${top_discard_arr[1]}`;
+
+  const maxAttempts = 20;
+  let attempts = 0;
+  while (top_deck === top_discard && attempts < maxAttempts) {
+    top_deck_arr = getRandomCard();
+    top_deck = `${top_deck_arr[0]}-${top_deck_arr[1]}`;
+    top_discard_arr = getRandomCard();
+    top_discard = `${top_discard_arr[0]}-${top_discard_arr[1]}`;
+    attempts++;
+  }
+
   const { id: game_id } = await Games.create(
     game_title,
     false,
-    "0-0",
-    "0-1",
+    top_deck,
+    top_discard,
     0,
     users_required
   );
@@ -104,6 +120,17 @@ Game.createGame = async (req, res) => {
     player_count: count,
     user_id: user_id,
     status: 201,
+  });
+};
+
+const addPlayersCardsToSet = () => {
+  cardsSet = new Set();
+  cardsSet.add(top_deck);
+  cardsSet.add(top_discard);
+  players.forEach((player) => {
+    player.hand?.forEach((card) => {
+      cardsSet.add(card);
+    });
   });
 };
 
@@ -120,7 +147,14 @@ const handleExistingPlayer = (playerInfo, user_id) => {
 
   if (!foundExistingPlayer) {
     players.push(playerInfo);
+    return;
   }
+};
+
+const setTopDeckAndDiscard = async (game_id) => {
+  const gameState = await Games.getGameState(game_id);
+  top_deck = gameState.top_deck + ".png";
+  top_discard = gameState.top_discard + ".png";
 };
 
 Game.startGame = async (req, res) => {
@@ -146,10 +180,6 @@ Game.startGame = async (req, res) => {
     let isPlayerExist = await Games.isPlayerExist(user_id, game_id);
     isPlayerExist = isPlayerExist?.user_id || null;
 
-    const gameState = await Games.getGameState(game_id);
-    top_deck = gameState.top_deck + ".png";
-    top_discard = gameState.top_discard + ".png";
-
     if (isPlayerExist) {
       const userCards = await Games.getAllUserCards(user_id, game_id);
 
@@ -174,6 +204,8 @@ Game.startGame = async (req, res) => {
       });
 
       handleExistingPlayer(playerInfo, user_id);
+      await setTopDeckAndDiscard(game_id);
+      addPlayersCardsToSet();
 
       io.in(game_id).emit(START_GAME, {
         top_deck,
@@ -199,20 +231,33 @@ Game.startGame = async (req, res) => {
     };
 
     await Games.createGameUser(game_id, user_id, true);
+    await setTopDeckAndDiscard(game_id);
 
     const cardsInHand = 7;
     for (let i = 0; i < cardsInHand; i++) {
-      const poppedCard = cards.pop();
-      const card_id = poppedCard.id;
-      const card_name = poppedCard.name;
+      let poppedCard = cards.pop();
+      let card_id = poppedCard.id;
+      let card_name = poppedCard.name;
+
+      const maxAttempts = 20;
+      let attempts = 0;
+      while (cardsSet.has(card_name) && attempts < maxAttempts) {
+        poppedCard = cards.pop();
+        card_id = poppedCard.id;
+        card_name = poppedCard.name;
+        attempts++;
+      }
+
       await Games.createPlayerCard(game_id, user_id, card_id);
       playerInfo.hand.push(card_name);
+      cardsSet.add(card_name);
     }
     let ongoingUpdated = await Games.setGameOngoing(true, game_id);
 
     ongoingUpdated = ongoingUpdated?.ongoing || false;
 
     handleExistingPlayer(playerInfo, user_id);
+    addPlayersCardsToSet();
 
     io.in(game_id).emit(START_GAME, {
       top_deck,
@@ -292,8 +337,19 @@ Game.drawCard = async (req, res) => {
     for (let i = 0; i < 2; i++) {
       playerInfo.hand?.push(top_deck);
       playerInfoNewCards.hand?.push(top_deck);
-      const top_deck_arr = getRandomCard();
+      let top_deck_arr = getRandomCard();
       top_deck = `${top_deck_arr[0]}-${top_deck_arr[1]}.png`;
+
+      const maxAttempts = 20;
+      let attempts = 0;
+
+      while (cardsSet.has(top_deck) && attempts < maxAttempts) {
+        top_deck_arr = getRandomCard();
+        top_deck = `${top_deck_arr[0]}-${top_deck_arr[1]}.png`;
+        attempts++;
+      }
+
+      cardsSet.add(top_deck);
     }
 
     await Games.saveGameState(
@@ -324,13 +380,26 @@ Game.drawCard = async (req, res) => {
   const card = top_deck;
   playerInfo.hand?.push(card);
   playerInfoNewCards.hand?.push(card);
+  cardsSet.add(top_deck);
   //find card ID before sending to db
   const cardID_arr = getCardID(card);
   const card_id = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
   await user_cards.drawCard(game_id, user_id, card_id);
 
   const top_deck_arr = getRandomCard();
-  top_deck = `${top_deck_arr[0]}-${top_deck_arr[1]}.png`;
+  let randomCard = `${top_deck_arr[0]}-${top_deck_arr[1]}.png`;
+
+  const maxAttempts = 20;
+  let attempts = 0;
+
+  while (cardsSet.has(randomCard) && attempts < maxAttempts) {
+    const top_deck_arr = getRandomCard();
+    randomCard = `${top_deck_arr[0]}-${top_deck_arr[1]}.png`;
+    attempts++;
+  }
+
+  top_deck = randomCard;
+  cardsSet.add(top_deck);
 
   await Games.saveGameState(
     game_id,
