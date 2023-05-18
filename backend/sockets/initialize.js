@@ -19,7 +19,7 @@ const initSockets = (app, sessionMiddleware) => {
       _socket.username = username;
       _socket.user_id = user_id;
 
-      const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
+      const numPlayers = io.sockets.adapter.rooms.get(game_id)?.size || 0;
       io.in(game_id).emit(JOIN_GAME, { message, numPlayers });
     });
 
@@ -31,7 +31,7 @@ const initSockets = (app, sessionMiddleware) => {
       _socket.username = username;
       _socket.user_id = user_id;
 
-      const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
+      const numPlayers = io.sockets.adapter.rooms.get(game_id)?.size || 0;
       io.in(game_id).emit(LEAVE_GAME, { message, numPlayers });
     });
   });
