@@ -11,12 +11,21 @@ import {
   PLAY_CARD,
   DRAW_CARD,
   CALL_UNO,
+  LEAVE_GAME,
 } from "./constants";
 
 const socket = io();
 const game_id = getGameId(document.location.pathname);
 const imgPath = "../images/";
 const user = JSON.parse(localStorage.getItem("user"));
+
+const quitBtn = document.getElementById("quit-btn-id");
+
+if (quitBtn) {
+  quitBtn.addEventListener("click", () => {
+    socket.emit(LEAVE_GAME, { game_id, user });
+  });
+}
 
 socket.emit(JOIN_GAME, { game_id, user });
 
@@ -117,8 +126,22 @@ socket.on(JOIN_GAME, ({ message, numPlayers }) => {
   showMessage(message);
 });
 
-socket.on(PLAY_CARD, ({ card_id, game_id, user_id, top_discard }) => {
+socket.on(LEAVE_GAME, ({ message, numPlayers }) => {
+  if (!document.getElementById("num-of-players-id")) {
+    return;
+  }
+
+  if (game_id && game_id !== 0) {
+    document.getElementById("num-of-players-id").innerText =
+      "Number of Players: " + numPlayers;
+  }
+
+  showMessage(message);
+});
+
+socket.on(PLAY_CARD, ({ card_id, game_id, user_id, top_discard, players }) => {
   document.getElementById("discard-img-id").src = imgPath + top_discard;
+  updateOpponentCards(players);
 });
 
 socket.on(

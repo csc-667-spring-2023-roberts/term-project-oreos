@@ -306,12 +306,34 @@ Game.playCard = async (req, res) => {
   }
 
   top_discard = card_id;
+
+  if (cardsSet.has(top_discard)) {
+    cardsSet.delete(top_discard);
+  }
+
   let cardID_arr = getCardID(card_id);
   let playedCardIDs = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
-  await user_cards.playCard(game_id, user_id, playedCardIDs, playedCardIDs.length);
+  await user_cards.playCard(
+    game_id,
+    user_id,
+    playedCardIDs,
+    playedCardIDs.length
+  );
 
+  await Games.saveGameState(
+    game_id,
+    top_deck.split(".")[0],
+    top_discard.split(".")[0],
+    position
+  );
 
-  io.in(game_id).emit(PLAY_CARD, { card_id, game_id, user_id, top_discard });
+  io.in(game_id).emit(PLAY_CARD, {
+    card_id,
+    game_id,
+    user_id,
+    top_discard,
+    players,
+  });
   res.send({
     message: "Played card: " + card_id,
     playerInfo: playerInfo,

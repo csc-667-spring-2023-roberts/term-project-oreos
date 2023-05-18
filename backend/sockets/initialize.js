@@ -22,6 +22,18 @@ const initSockets = (app, sessionMiddleware) => {
       const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
       io.in(game_id).emit(JOIN_GAME, { message, numPlayers });
     });
+
+    _socket.on(LEAVE_GAME, ({ game_id, user }) => {
+      _socket.leave(game_id);
+      const username = user?.username;
+      const user_id = user?.id;
+      const message = username + " left room: " + game_id;
+      _socket.username = username;
+      _socket.user_id = user_id;
+
+      const numPlayers = io.sockets.adapter.rooms.get(game_id).size;
+      io.in(game_id).emit(LEAVE_GAME, { message, numPlayers });
+    });
   });
 
   app.set("io", io);

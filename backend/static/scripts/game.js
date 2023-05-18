@@ -95,8 +95,6 @@ const addCardsToPlayerHand = () => {
     cardImage.setAttribute("height", "100px");
 
     cardImage.addEventListener("click", async () => {
-      console.log("Card played:" + card);
-
       await playCard(card);
     });
 
@@ -208,7 +206,6 @@ const playCard = async (cardName) => {
     const res = await fetch(`/api/games/${game_id}/play`, options);
     const data = await res.json();
     playerInfo = data.playerInfo;
-    console.log(playerInfo.hand.length);
 
     if (playerInfo.hand.length === 1) {
       showUnoCallButton();
