@@ -24,9 +24,10 @@
   height: 600px;
   overflow-y: scroll;
   display: block;
+  padding-left: 10px;
 }
 
-.container {
+.game-container {
   display: flex;
 }
 
@@ -35,9 +36,60 @@
   width: 100px;
   margin-top: 30px;
   margin-bottom: 30px;
+  background-color: rgb(167, 167, 243);
+  font-size: 20px;
 }
 
 .message {
   background-color: rgb(59, 245, 149);
   margin-bottom: 1px;
+}
+
+.opponent-hand {
+  display: flex;
+  position: relative;
+}
+
+.opponent-card:not(:first-child) {
+  position: relative;
+  margin-left: -50px;
+}
+
+.pile-container {
+  display: flex;
+  justify-content: center;
+}
+
+.discard-container {
+  margin-left: 50px;
+}
+
+.msg-form {
+  margin-top: 10px;
+  margin-bottom: 50px;
+  font-size: 20px;
+}
+
+.msg-input {
+  width: 180px;
+  height: 30px;
+}
+
+.msg-btn {
+  width: 100px;
+  height: 30px;
+}
+
+.quit-btn {
+  height: 40px;
+  width: 170px;
+  font-size: 20px;
+  background-color: yellow;
+}
+
+.num-players {
+  border: 2px solid white;
+  width: 300px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }

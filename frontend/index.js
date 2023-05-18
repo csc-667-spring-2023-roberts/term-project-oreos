@@ -69,6 +69,7 @@ const updateOpponentCards = (players) => {
       let playerHandUI = document.createElement("div");
       playerHandUI.innerHTML = "";
       playerHandUI.id = "opponent-hand-id";
+      playerHandUI.className = "opponent-hand";
       const playerTitle = document.createElement("p");
 
       playerTitle.innerText = player.name;
@@ -77,7 +78,7 @@ const updateOpponentCards = (players) => {
         const cardImage = document.createElement("img");
         cardImage.setAttribute("src", `${imgPath}back.png`);
         cardImage.id = card + "-id";
-        cardImage.setAttribute("class", `${player.name}`);
+        cardImage.setAttribute("class", "opponent-card");
         cardImage.setAttribute("width", "100px");
         cardImage.setAttribute("height", "100px");
         playerHandUI.appendChild(cardImage);

@@ -337,7 +337,7 @@ const endGame = () => {
 };
 
 const delayInitCards = () => {
-  const delay = Math.random() * 2000 + 700;
+  const delay = Math.random() * 1100 + 700;
   setTimeout(async () => {
     await initCards();
   }, delay);
