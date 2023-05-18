@@ -171,5 +171,5 @@ exports.down = (pgm) => {
   pgm.dropTable("cards");
   pgm.dropTable("lobby_messages");
   pgm.dropTable("game_room_messages");
-  //pgm.dropTable("session");
+  pgm.dropTable("session");
 };

@@ -2,7 +2,6 @@ const path = require("path");
 const createError = require("http-errors");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
-const testRoutes = require("./backend/routes/test/index.js");
 const initSockets = require("./backend/sockets/initialize.js");
 
 const express = require("express");
@@ -33,7 +32,6 @@ const sessionMiddleware = session({
 app.use(sessionMiddleware);
 const server = initSockets(app, sessionMiddleware);
 
-app.use("/test", testRoutes);
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

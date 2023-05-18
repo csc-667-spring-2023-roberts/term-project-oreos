@@ -1,13 +1,82 @@
+/* Register */
 
-  /* Register */
-
-body{
-    background-color: #c81b1b;
+body {
+  font-family: Arial, Helvetica, sans-serif;
 }
 
+.h1 {
+  text-align: center;
+}
 
+input[type="username"],
+input[type="password"],
+input[type="emailAdd"] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+}
 
-.register{
+.container {
+  padding: 16px;
+  width: 50%;
+  justify-content: center;
+  border: 1px solid #ccc;
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -100%);
+}
+
+button {
+  background-color: #04aa6d;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* 
+  .cancelbtn {
+    width: auto;
+    padding: 10px 18px;
+    background-color: #f44336;
+  }
+  
+  .imgcontainer {
+    text-align: center;
+    margin: 24px 0 12px 0;
+  }
+  
+  img.avatar {
+    width: 40%;
+    border-radius: 50%;
+  }
+  
+  
+  
+  span.psw {
+    float: right;
+    padding-top: 16px;
+  } */
+
+body {
+  background-color: #f16464;
+  justify-content: center;
+}
+
+/* .register{
     height: 80%;
     width: 100%;
     display: flex;
@@ -22,7 +91,7 @@ body{
     display: flex;
     flex-direction: column;
     text-align: center;
-    background-color: #c6c9c8;
+    background-color: #fcfefd;
     padding: 40px;
     font-family: "Lucida Console", "Courier New", monospace;
   }
@@ -48,12 +117,11 @@ body{
   .register div {
     margin-top: 7px;
   }
-  
-
+   */
 
 /* Navbar */
 
-  ul.topnav {
+/* ul.topnav {
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -82,4 +150,4 @@ body{
     ul.topnav li.right, 
     ul.topnav li {float: none;}
   }
- 
+  */

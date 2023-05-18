@@ -1,7 +1,37 @@
 /* Register */
 
 body {
-  background-color: #c81b1b;
+  background-color: #f16464;
+}
+
+.home {
+  padding-top: 10%;
+  text-align: center;
+
+  /* display: inline; */
+}
+
+.btn {
+  background-color: #4ca8af; /* Green */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 20px;
+}
+
+.btn:hover {
+  background-color: #095d63;
+}
+
+.game-form-container {
+  max-height: 300px;
+  max-width: 100%;
+  text-align: center;
+  border: 2px solid black;
+  padding: 10px;
 }
 
 .register {

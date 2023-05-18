@@ -1,4 +1,8 @@
 const showMessageAuth = (data) => {
+  if (!document.getElementById("msg-id")) {
+    return;
+  }
+
   document.getElementById("msg-id").innerText = data.message;
 
   setTimeout(() => {
@@ -7,7 +11,7 @@ const showMessageAuth = (data) => {
 };
 
 const register = async () => {
-  const form = document.getElementById("register-form-id");
+  const form = document.getElementById("signin-form-id");
   const formData = new FormData(form);
   const formDataJson = {};
 
@@ -32,6 +36,7 @@ const register = async () => {
       return;
     }
 
+    localStorage.setItem("user", JSON.stringify(data.user));
     window.location.href = data.url;
   } catch (err) {
     console.log(err);
@@ -64,6 +69,7 @@ const signin = async () => {
       return;
     }
 
+    localStorage.setItem("user", JSON.stringify(data.user));
     window.location.href = data.url;
   } catch (err) {
     console.log(err);
@@ -74,6 +80,8 @@ const signout = async () => {
   try {
     const res = await fetch(`/api/users/signout`);
     const data = await res.json();
+
+    localStorage.removeItem("user");
     window.location.href = data.url;
   } catch (err) {
     console.log(err);

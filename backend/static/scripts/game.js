@@ -1,12 +1,30 @@
 let playerInfo = [];
-let opponents = [];
+let players = [];
 const imgPath = "../images/";
 
 const showMessage = (data) => {
+  if (!document.getElementById("msg-id")) {
+    return;
+  }
+
   document.getElementById("msg-id").innerText = data.message;
 
   setTimeout(() => {
     document.getElementById("msg-id").innerText = "";
+  }, 5000);
+};
+
+const showUnoCallButton = () => {
+  const unoButton = document.createElement("button");
+  unoButton.innerHTML = "Call UNO";
+  unoButton.onclick = function () {
+    callUno();
+  };
+  unoButton.id = "uno-button-id";
+  document.getElementById("call-uno-container-id").appendChild(unoButton);
+
+  setTimeout(() => {
+    document.getElementById("uno-button-id").remove();
   }, 5000);
 };
 
@@ -48,24 +66,24 @@ const initCards = async () => {
     const res = await fetch(`/api/games/${game_id}/start`, options);
     const data = await res.json();
     playerInfo = data.playerInfo;
-    opponents = data.opponents;
+    players = data.players;
 
     if (data.status === 400 || data.status === 500) {
       showMessage(data);
       return;
     }
+
+    startGame();
   } catch (err) {
     console.log(err);
   }
-
-  startGame();
 };
 
 const addCardsToPlayerHand = () => {
-  const playerHandUI = document.createElement("div");
+  const parentHandUI = document.getElementById("player-hand-parent-id");
+  let playerHandUI = document.createElement("div");
   playerHandUI.id = "player-hand-id";
   const playerTitle = document.createElement("p");
-
   playerTitle.innerText = playerInfo.name;
 
   playerInfo.hand.forEach((card) => {
@@ -77,49 +95,19 @@ const addCardsToPlayerHand = () => {
     cardImage.setAttribute("height", "100px");
 
     cardImage.addEventListener("click", async () => {
-      console.log("Card played:" + card);
-
       await playCard(card);
     });
 
     playerHandUI.appendChild(cardImage);
   });
 
-  document.getElementById("player-hand-parent-id").appendChild(playerTitle);
-  document.getElementById("player-hand-parent-id").appendChild(playerHandUI);
-};
-
-const addCardsToOpponentHand = () => {
-  opponents.forEach((opponent) => {
-    const opponentHandUI = document.createElement("div");
-    opponentHandUI.id = "opponent-hand-id";
-    const playerTitle = document.createElement("p");
-
-    playerTitle.innerText = opponent.name;
-
-    opponent.hand.forEach((card) => {
-      const cardImage = document.createElement("img");
-      cardImage.id = card + "-id";
-      cardImage.setAttribute("src", `${imgPath}${card}`);
-      cardImage.setAttribute("class", `${opponent.name}`);
-      cardImage.setAttribute("width", "100px");
-      cardImage.setAttribute("height", "100px");
-      opponentHandUI.appendChild(cardImage);
-    });
-
-    document
-      .getElementById("opponents-hand-parent-id")
-      .appendChild(playerTitle);
-    document
-      .getElementById("opponents-hand-parent-id")
-      .appendChild(opponentHandUI);
-  });
+  parentHandUI.innerHTML = "";
+  parentHandUI.appendChild(playerTitle);
+  parentHandUI.appendChild(playerHandUI);
 };
 
 const startGame = () => {
   addCardsToPlayerHand(playerInfo);
-  addCardsToOpponentHand();
-  console.log("init and started game");
 };
 
 const sendMessage = async () => {
@@ -158,6 +146,46 @@ const sendMessage = async () => {
   }
 };
 
+const getAllMessages = async () => {
+  try {
+    const game_id = getGameId(document.location.pathname);
+    const res = await fetch(`/api/games/${game_id}/chat`, { method: "GET" });
+    const data = await res.json();
+    const messageArray = data.messageArray;
+
+    if (data.status === 400 || data.status === 500) {
+      return;
+    }
+
+    let chatList = document.getElementById("chat-list-id");
+
+    if (!chatList) {
+      return;
+    }
+
+    chatList.innerHTML = "";
+
+    messageArray.map((msg) => {
+      let li = document.createElement("div");
+      li.className = "message";
+      const date = new Date(msg.created_at);
+
+      const createdAtFormatted = date.toLocaleString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      });
+
+      li.innerHTML = `${msg.username} ${createdAtFormatted}: ${msg.message}`;
+      chatList.appendChild(li);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 const playCard = async (cardName) => {
   const formDataJson = {};
 
@@ -178,6 +206,10 @@ const playCard = async (cardName) => {
     const res = await fetch(`/api/games/${game_id}/play`, options);
     const data = await res.json();
     playerInfo = data.playerInfo;
+
+    if (playerInfo.hand.length === 1) {
+      showUnoCallButton();
+    }
 
     if (data.status === 400 || data.status === 500) {
       showMessage(data);
@@ -241,19 +273,59 @@ const drawCard = async () => {
   }
 };
 
-const callUno = () => {
-  //TODO implement
-  console.log("called uno");
+const callUno = async () => {
+  const formDataJson = {};
+
+  const game_id = getGameId(document.location.pathname);
+  formDataJson["game_id"] = game_id;
+
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formDataJson),
+  };
+
+  try {
+    const res = await fetch(`/api/games/${game_id}/uno`, options);
+    const data = await res.json();
+
+    if (data.status === 400 || data.status === 500) {
+      showMessage(data);
+      return;
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-const saveGameState = () => {
-  //TODO implement
-  console.log("game state saved");
-};
+const saveGameState = async () => {
+  const formDataJson = {};
 
-const getGameState = () => {
-  //TODO implement
-  console.log("get game state");
+  const game_id = getGameId(document.location.pathname);
+  formDataJson["game_id"] = game_id;
+
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formDataJson),
+  };
+
+  try {
+    const res = await fetch(`/api/games/${game_id}/state`, options);
+    const data = await res.json();
+    window.location.href = "/lobby";
+
+    if (data.status === 400 || data.status === 500) {
+      showMessage(data);
+      return;
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const endGame = () => {
@@ -261,6 +333,12 @@ const endGame = () => {
   console.log("game ended");
 };
 
-setTimeout(async () => {
-  await initCards();
-}, 1000);
+const delayInitCards = () => {
+  const delay = Math.random() * 1100 + 700;
+  setTimeout(async () => {
+    await initCards();
+  }, delay);
+};
+
+delayInitCards();
+getAllMessages();

@@ -5,8 +5,9 @@ const User = {};
 const SALT_ROUNDS = 10;
 
 User.signin = async (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
   const oldUsername = req.body.username;
+  const email = req.body.emailAddress;
 
   try {
     const {
@@ -23,7 +24,11 @@ User.signin = async (req, res) => {
         email,
       };
 
-      res.send({ url: "/lobby", status: 200 });
+      res.send({
+        url: "/lobby",
+        status: 200,
+        user: { username: username, id: id },
+      });
     } else {
       res.send({ message: "Invalid credentials", status: 400 });
     }
@@ -33,7 +38,8 @@ User.signin = async (req, res) => {
 };
 
 User.register = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, password } = req.body;
+  const email = req.body.emailAddress;
 
   if (
     !username ||
@@ -51,7 +57,14 @@ User.register = async (req, res) => {
   const hash = await bcrypt.hash(password, salt);
 
   try {
-    const id = await Users.create(username, email, hash);
+    const oldUser = await Users.findByEmailOrUsername(email, username);
+    if (oldUser?.email) {
+      res.send({ message: "Error signing up", status: 400 });
+      return;
+    }
+
+    const result = await Users.create(username, email, hash);
+    const id = result.id;
 
     req.session.user = {
       id,
@@ -59,7 +72,11 @@ User.register = async (req, res) => {
       email,
     };
 
-    res.send({ url: "/lobby", status: 200 });
+    res.send({
+      url: "/lobby",
+      status: 200,
+      user: { username: username, id: id },
+    });
   } catch (error) {
     res.send({ message: "Error signing up", status: 500 });
   }
