@@ -336,8 +336,12 @@ const endGame = () => {
   console.log("game ended");
 };
 
-setTimeout(async () => {
-  await initCards();
-}, 1000);
+const delayInitCards = () => {
+  const delay = Math.random() * 2000 + 700;
+  setTimeout(async () => {
+    await initCards();
+  }, delay);
+};
 
+delayInitCards();
 getAllMessages();
