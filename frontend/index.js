@@ -33,7 +33,7 @@ socket.on(REDIRECT_TO_GAME_ROOM, ({ game_id }) => {
   window.location.href = `/games/${game_id}`;
 });
 
-socket.on(CREATE_GAME, ({ gametitle, count, user_id, game_id, ongoing }) => {
+socket.on(CREATE_GAME, ({ gametitle, count, game_id, ongoing }) => {
   let gamesList = document.getElementById("games-list-id");
 
   if (!gamesList) {
@@ -43,7 +43,7 @@ socket.on(CREATE_GAME, ({ gametitle, count, user_id, game_id, ongoing }) => {
   let li = document.createElement("div");
   li.style.backgroundColor = "rgb(59, 245, 149)";
   li.style.marginBottom = "1px";
-  li.innerHTML = `Title: <a class="game-room-link" href="/waitingroom/${game_id}">${gametitle}</a>, Players: ${count}, Started: ${ongoing}`;
+  li.innerHTML = `<a class="game-room-link" href="/waitingroom/${game_id}">Title: ${gametitle}, # ${game_id} Players: ${count}, Started: ${ongoing}</a>`;
   gamesList.appendChild(li);
 });
 
@@ -80,8 +80,8 @@ const updateOpponentCards = (players) => {
       playerHandUI.id = "opponent-hand-id";
       playerHandUI.className = "opponent-hand";
       const playerTitle = document.createElement("p");
-
-      playerTitle.innerText = player.name;
+      playerTitle.innerText = `Opponent: ${player.name}`;
+      playerTitle.className = "player-name";
 
       player.hand.forEach((card) => {
         const cardImage = document.createElement("img");
@@ -89,7 +89,7 @@ const updateOpponentCards = (players) => {
         cardImage.id = card + "-id";
         cardImage.setAttribute("class", "opponent-card");
         cardImage.setAttribute("width", "100px");
-        cardImage.setAttribute("height", "100px");
+        cardImage.setAttribute("height", "135px");
         playerHandUI.appendChild(cardImage);
       });
 
@@ -139,23 +139,20 @@ socket.on(LEAVE_GAME, ({ message, numPlayers }) => {
   showMessage(message);
 });
 
-socket.on(PLAY_CARD, ({ card_id, game_id, user_id, top_discard, players }) => {
+socket.on(PLAY_CARD, ({ top_discard, players }) => {
   document.getElementById("discard-img-id").src = imgPath + top_discard;
   updateOpponentCards(players);
 });
 
-socket.on(
-  DRAW_CARD,
-  ({ card_id, game_id, user_id, discardPile, top_deck, players }) => {
-    document.getElementById("deck-img-id").src = imgPath + top_deck;
-    updateOpponentCards(players);
-  }
-);
+socket.on(DRAW_CARD, ({ top_deck, players }) => {
+  document.getElementById("deck-img-id").src = imgPath + top_deck;
+  updateOpponentCards(players);
+});
 
 socket.on(CALL_UNO, ({ message }) => {
   document.getElementById("call-uno-msg-id").innerText = message;
 
   setTimeout(() => {
     document.getElementById("call-uno-msg-id").innerText = "";
-  }, 5000);
+  }, 7000);
 });

@@ -11,7 +11,7 @@ const showMessage = (data) => {
 
   setTimeout(() => {
     document.getElementById("msg-id").innerText = "";
-  }, 5000);
+  }, 10000);
 };
 
 const showUnoCallButton = () => {
@@ -25,7 +25,7 @@ const showUnoCallButton = () => {
 
   setTimeout(() => {
     document.getElementById("uno-button-id").remove();
-  }, 5000);
+  }, 10000);
 };
 
 const getUserSession = async () => {
@@ -84,15 +84,16 @@ const addCardsToPlayerHand = () => {
   let playerHandUI = document.createElement("div");
   playerHandUI.id = "player-hand-id";
   const playerTitle = document.createElement("p");
-  playerTitle.innerText = playerInfo.name;
+  playerTitle.innerText = `Player: ${playerInfo.name}`;
+  playerTitle.className = "player-name";
 
   playerInfo.hand.forEach((card) => {
     const cardImage = document.createElement("img");
     cardImage.id = card + "-id";
     cardImage.setAttribute("src", `${imgPath}${card}`);
-    cardImage.setAttribute("class", `${playerInfo.name}`);
+    cardImage.setAttribute("class", "playercard");
     cardImage.setAttribute("width", "100px");
-    cardImage.setAttribute("height", "100px");
+    cardImage.setAttribute("height", "135px");
 
     cardImage.addEventListener("click", async () => {
       await playCard(card);
@@ -253,7 +254,7 @@ const drawCard = async () => {
       cardImage.setAttribute("src", `${imgPath}${card}`);
       cardImage.setAttribute("class", `${playerInfoNewCards.name}`);
       cardImage.setAttribute("width", "100px");
-      cardImage.setAttribute("height", "100px");
+      cardImage.setAttribute("height", "135px");
 
       cardImage.addEventListener("click", async () => {
         console.log("Card played:" + card);

@@ -1,0 +1,16 @@
+.container {
+  text-align: center;
+}
+
+.start-btn {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-left: 35px;
+  padding-right: 35px;
+  background-color: rgb(153, 204, 77);
+  font-size: 30px;
+}
+
+.start-btn:hover {
+  background-color: yellow;
+}

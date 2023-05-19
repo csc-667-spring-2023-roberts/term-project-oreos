@@ -7,7 +7,7 @@ const showMessageAuth = (data) => {
 
   setTimeout(() => {
     document.getElementById("msg-id").innerText = "";
-  }, 5000);
+  }, 10000);
 };
 
 const register = async () => {
