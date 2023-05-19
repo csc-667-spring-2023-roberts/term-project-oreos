@@ -7,5 +7,5 @@ export const showMessage = (message) => {
 
   setTimeout(() => {
     document.getElementById("msg-id").innerText = "";
-  }, 5000);
+  }, 10000);
 };

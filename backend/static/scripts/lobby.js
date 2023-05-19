@@ -7,7 +7,7 @@ const showMessage = (data) => {
 
   setTimeout(() => {
     document.getElementById("msg-id").innerText = "";
-  }, 5000);
+  }, 10000);
 };
 
 const getUserSession = async () => {
@@ -84,7 +84,7 @@ const getAllGames = async () => {
     messageArray.map((msg) => {
       let li = document.createElement("div");
       li.className = "message";
-      li.innerHTML = `Title: <a href="/waitingroom/${msg.id}">${msg.game_title}</a>, Players: ${msg.users_required}, Started: ${msg.ongoing}`;
+      li.innerHTML = `<a href="/waitingroom/${msg.id}">Title: ${msg.game_title}, # ${msg.id}, Players: ${msg.users_required}, Started: ${msg.ongoing}</a>`;
       gameList.appendChild(li);
     });
   } catch (err) {

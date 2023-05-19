@@ -6,6 +6,9 @@ block content
     script(src='/scripts/lobby.js', defer)
   h1 Lobby Page (Authenticated)
 
+  if user_name
+    h2 Welcome #{user_name}
+
   div(class="game-form-container")
     form(id="create-game-form-id" onsubmit="createGame(); return false;")
       label

@@ -153,8 +153,10 @@ const handleExistingPlayer = (playerInfo, user_id) => {
 
 const setTopDeckAndDiscard = async (game_id) => {
   const gameState = await Games.getGameState(game_id);
-  top_deck = gameState.top_deck + ".png";
-  top_discard = gameState.top_discard + ".png";
+  top_deck = gameState.top_deck ? gameState.top_deck + ".png" : "0-0.png";
+  top_discard = gameState.top_discard
+    ? gameState.top_discard + ".png"
+    : "1-1.png";
   cardsSet.add(top_deck);
   cardsSet.add(top_discard);
 };
