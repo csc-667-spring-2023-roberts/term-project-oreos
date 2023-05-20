@@ -299,6 +299,18 @@ Game.playCard = async (req, res) => {
 
   let playerInfo = [];
 
+    // Add your UNO rules condition here
+    const followsUNORules = checkIfFollowsUNORules(card_id, playerInfo.hand);
+    if (!followsUNORules) {
+      res.status(400).send({
+        message: "Card does not follow UNO rules: " + card_id,
+        playerInfo: playerInfo,
+        status: 400,
+      });
+      return;
+    }
+ 
+
   for (let i = 0; i < players.length; i++) {
     if (user_id === players[i].user_id) {
       let idx = Array.from(players[i].hand.indexOf(card_id));
@@ -342,6 +354,44 @@ Game.playCard = async (req, res) => {
     status: 200,
   });
 };
+
+// uno rules condition
+const checkIfFollowsUNORules = (card_id, playerHand) => {
+   // Get the color and number of the played card
+   const playedColor = card_id.split("-")[0];
+   const playedNumber = parseInt(card_id.split("-")[1]);
+ 
+   // Get the top discard card's color and number
+   const topDiscardColor = top_discard.split("-")[0];
+   const topDiscardNumber = parseInt(top_discard.split("-")[1]);
+ 
+   // Check if the played card matches the top discard card color or number
+   if (playedColor === topDiscardColor || playedNumber === topDiscardNumber) {
+     return true;
+   }
+ 
+   // Check if the played card is a wild or wild draw four
+   if (playedColor === "wild" || playedColor === "wild-draw-four") {
+     return true;
+   }
+ 
+   // Check if the player has a matching color or number card in their hand
+   for (let card of playerHand) {
+     const cardColor = card.split("-")[0];
+     const cardNumber = parseInt(card.split("-")[1]);
+ 
+     if (cardColor === topDiscardColor || cardNumber === topDiscardNumber) {
+       return false;
+     }
+   }
+ 
+   return true; 
+
+}
+
+
+// end of Uno rule condition
+
 
 Game.drawCard = async (req, res) => {
   const { game_id, user_id } = req.body;

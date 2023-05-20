@@ -5,20 +5,23 @@ block content
     link(rel='stylesheet' href='/stylesheets/game.css')
     script(src='/scripts/game.js', defer)
 
+  //- Heading
   div(class = "h1")
     h1 Game #{id} Page (Authenticated)
 
   input(class="quit-btn" id="quit-btn-id" type='button' value='Quit' onclick="saveGameState()")
+  input(class="quit-btn" id="quit-btn-id" type='button' value='Start Game' onclick="startGame")
 
   h3(id="num-of-players-id" class="num-players") Number of Players: 1
 
 
+  //- Gameplay screen
   div(class='pile-container')
     div(class="deck-container")
       div(class='deck')
         h3 Deck
         img(id="deck-img-id" src='', alt='Deck' height="135px" width="100px")
-      input(class="draw-btn" type='button' value='Draw' onclick="drawCard()")
+      input(class="draw-btn" type='button' value='Draw' onclick= "drawCard()")
 
     div(class="discard-container")
       div(class='discard-pile')
@@ -29,16 +32,19 @@ block content
     h3(id="call-uno-msg-id")
   
 
-  div(class="game-container")
 
-    div(class="game-cards-container")
+  //- Hands
+  div(class="game-container")
+    div(class="game-cards-container" )
       h1 Hands
       div(class="game-cards")
         div(id='player-hand-parent-id')
-          h3 Player:
+          h3 Player:  
+
         div(id='opponents-hand-parent-id')
           h3 Opponents: 
 
+    //- Chatbox
     div(class="chat-list-container")
       h1 Chat
       div(class="chat-list" id="chat-list-id")

@@ -187,6 +187,8 @@ const getAllMessages = async () => {
   }
 };
 
+
+// PLAY CARD
 const playCard = async (cardName) => {
   const formDataJson = {};
 
@@ -223,6 +225,8 @@ const playCard = async (cardName) => {
   const cardUI = document.getElementById(cardName + "-id");
   cardUI.remove();
 };
+
+//end of PLAY CARD
 
 const drawCard = async () => {
   const formDataJson = {};
