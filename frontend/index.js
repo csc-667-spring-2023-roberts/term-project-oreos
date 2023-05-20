@@ -1,4 +1,3 @@
-console.log("Hello from a bundled  assetsss.");
 import io from "socket.io-client";
 import { getGameId } from "./get-game-id";
 import { showMessage } from "./show-alert-message";

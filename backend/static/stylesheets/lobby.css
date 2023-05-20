@@ -1,18 +1,28 @@
-.list-container {
-  display: flex;
+.title-container {
+  text-align: center;
 }
 
+.list-container {
+  display: flex;
+  justify-content: center;
+}
 .game-list-container {
   display: block;
+  border: 2px solid #c6c9c8;
+  padding: 10px;
+  width: 50%;
 }
 
 .chat-list-container {
   display: block;
+  border: 2px solid #c6c9c8;
+  padding: 10px;
+  width: 50%;
 }
 
 .game-list {
-  border: 2px solid blue;
-  width: 400px;
+  border: 2px solid white;
+  width: 100%;
   height: 200px;
   overflow-y: scroll;
   font-size: 20px;
@@ -20,18 +30,39 @@
 
 .chat-list {
   border: 2px solid white;
-  width: 400px;
+  width: 100%;
   height: 200px;
   overflow-y: scroll;
   font-size: 20px;
 }
 
 .game-form-container {
-  border: 2px solid blue;
+  max-height: 300px;
+  max-width: 100%;
+  text-align: center;
+  padding: 10px;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  font-size: 20px;
+}
+
+.game-form-row {
+  margin-bottom: 10px;
+}
+
+.game-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+label {
+  display: block;
 }
 
 .chat-form-container {
-  border: 2px solid white;
+  max-width: 100%;
 }
 .message {
   background-color: rgb(59, 245, 149);
@@ -44,4 +75,20 @@
 
 .game-room-link:hover {
   color: yellow;
+}
+
+.msg-form {
+  margin-top: 10px;
+  margin-bottom: 50px;
+  font-size: 20px;
+}
+
+.msg-input {
+  width: 200px;
+  height: 30px;
+}
+
+.msg-btn {
+  width: 100px;
+  height: 30px;
 }

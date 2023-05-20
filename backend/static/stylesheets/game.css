@@ -4,11 +4,13 @@
 
 .chat-list-container {
   display: block;
+  width: 60%;
+  margin-left: 12px;
 }
 
 .chat-list {
   border: 2px solid white;
-  width: 400px;
+  width: 100%;
   height: 600px;
   overflow-y: scroll;
   font-size: 20px;
@@ -16,11 +18,12 @@
 
 .game-cards-container {
   display: block;
+  width: 100%;
 }
 
 .game-cards {
   border: 2px solid white;
-  width: 900px;
+  width: 100%;
   height: 600px;
   overflow-y: scroll;
   display: block;
@@ -29,6 +32,10 @@
 
 .game-container {
   display: flex;
+}
+
+.game-form {
+  display: block;
 }
 
 .draw-btn {
@@ -65,8 +72,8 @@
 }
 
 .msg-form {
-  margin-top: 10px;
-  margin-bottom: 50px;
+  margin-top: 23px;
+  margin-left: 10px;
   font-size: 20px;
 }
 
@@ -97,4 +104,9 @@
 .player-name {
   font-size: 20px;
   font-weight: bold;
+}
+
+.chat-form-container {
+  display: flex;
+  align-items: center;
 }

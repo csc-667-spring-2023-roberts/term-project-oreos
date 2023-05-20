@@ -6,7 +6,7 @@ block content
     script(src='/scripts/game.js', defer)
 
   div(class = "h1")
-    h1 Game #{id} Page (Authenticated)
+    h1 Game Room #{id}
 
   input(class="quit-btn" id="quit-btn-id" type='button' value='Quit' onclick="saveGameState()")
 
@@ -40,13 +40,14 @@ block content
           h3 Opponents: 
 
     div(class="chat-list-container")
-      h1 Chat
+      div(class="chat-form-container")
+        h1 Chat
+        form(id="send-chat-form-id" class="msg-form" onsubmit="sendMessage(); return false;")
+          input(type='text' class="msg-input" name="message" required)
+          input(type='submit' class="msg-btn" value='Send')  
       div(class="chat-list" id="chat-list-id")
       
-      form(id="send-chat-form-id" class="msg-form" onsubmit="sendMessage(); return false;")
-        em Message
-        input(type='text' class="msg-input" name="message" required)
-        input(type='submit' class="msg-btn" value='Send')  
+
 
       
 
