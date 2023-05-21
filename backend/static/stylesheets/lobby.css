@@ -69,12 +69,13 @@ label {
   margin-bottom: 1px;
 }
 
-.message > a:hover {
-  color: yellow;
+.game {
+  background-color: rgb(139, 246, 210);
+  margin-bottom: 1px;
 }
 
 .game-room-link:hover {
-  color: yellow;
+  color: rgb(255, 0, 179);
 }
 
 .msg-form {
