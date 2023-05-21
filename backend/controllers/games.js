@@ -311,7 +311,8 @@ Game.playCard = async (req, res) => {
   }
 
   // Add your UNO rules condition here
-  const followsUNORules = checkIfFollowsUNORules(card_id, playerInfo.hand);
+  const followsUNORules = checkUNORules(card_id, playerInfo.hand);
+
   if (!followsUNORules) {
     res.status(400).send({
       message: "Card does not follow UNO rules: " + card_id,
@@ -322,9 +323,11 @@ Game.playCard = async (req, res) => {
   }
 
 
-  // if (cardsSet.has(top_discard)) {
-  //   cardsSet.delete(top_discard);
-  // }
+  top_discard = card_id;
+
+  if (cardsSet.has(top_discard)) {
+    cardsSet.delete(top_discard);
+  }
 
   let cardID_arr = getCardID(card_id);
   let playedCardIDs = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
@@ -357,7 +360,7 @@ Game.playCard = async (req, res) => {
 };
 
 // uno rules condition
-const checkIfFollowsUNORules = (card_id, playerHand) => {
+const checkUNORules = (card_id, playerHand) => {
 
   // Get the color and number of the played card
   const playedColor = card_id.split("-")[0];
@@ -367,20 +370,19 @@ const checkIfFollowsUNORules = (card_id, playerHand) => {
   const topDiscardColor = top_discard.split("-")[0];
   const topDiscardNumber = parseInt(top_discard.split("-")[1]);
 
+  console.log("Player Hand before matching: " + playerHand);
   // Check if the played color OR number matched the discard
   if (playedColor === topDiscardColor || playedNumber === topDiscardNumber) {
+    console.log("When Card matches 1: " + playerHand);
     return true;
   }
  
-
-  // Check if the player has a matching color or number card in their hand
-
-
   for (let card of playerHand) {
     const cardColor = card.split("-")[0];
     const cardNumber = parseInt(card.split("-")[1]);
 
     if (cardColor === topDiscardColor || cardNumber === topDiscardNumber) {
+      console.log("When Card matches 2: " + playerHand);
       return true;
     }
     
