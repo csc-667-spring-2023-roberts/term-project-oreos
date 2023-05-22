@@ -288,35 +288,6 @@ Game.endGame = async (req, res) => {
   res.send({ message: "Game ended" });
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ------------------------
 // Play Card
 // ------------------------
@@ -338,19 +309,14 @@ Game.playCard = async (req, res) => {
   //loop through players, if uid matches then assign playerInfo
   for (let i = 0; i < players.length; i++) {
     if (user_id === players[i].user_id) {
-      let idx = Array.from(players[i].hand.indexOf(card_id));
-      players[i].hand.splice(idx, 1);
       playerInfo = players[i];
+      break;
     }
   }
-
-  console.log("Player's Hand before checking rule")
-  console.log(playerInfo);
 
   //Add your UNO rules condition here
   const followsUNORules = checkUNORules(card_id, playerInfo.hand);
 
-  
   if (!followsUNORules) {
     res.status(400).send({
       message: "Card does not follow UNO rules: " + card_id,
@@ -360,8 +326,12 @@ Game.playCard = async (req, res) => {
     return;
   }
 
+  if (user_id === playerInfo.user_id) {
+    let idx = Array.from(playerInfo.hand.indexOf(card_id));
+    playerInfo.hand.splice(idx, 1);
+  }
 
-  console.log("Player's Hand AFTER checking rule")
+  console.log("Player's Hand AFTER checking rule");
   console.log(playerInfo);
 
   top_discard = card_id;
@@ -398,8 +368,6 @@ Game.playCard = async (req, res) => {
     playerInfo: playerInfo,
     status: 200,
   });
-
-
 };
 
 // uno rules condition
@@ -419,7 +387,7 @@ const checkUNORules = (card_id, playerHand) => {
     console.log("When Card matches 1: " + playerHand);
     return true;
   }
-  if(playedColor === 4){
+  if (playedColor === 4) {
     console.log("Special card");
     return true;
   }
@@ -433,11 +401,8 @@ const checkUNORules = (card_id, playerHand) => {
   //     return true;
   //   }
   // }
-
   return false;
-}; 
-
-
+};
 
 const checkTurn = async (game_id, user_id) => {
   let playerTurn = await Games.getPlayerTurn(game_id, user_id);
@@ -458,46 +423,6 @@ const updateGamePosition = async (game_id) => {
     await Games.updateGamePosition(game_id, position);
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Game.drawCard = async (req, res) => {
   const { game_id, user_id } = req.body;
@@ -563,7 +488,7 @@ Game.drawCard = async (req, res) => {
     return;
   }
   const isValidTurn = await checkTurn(game_id, user_id);
-  if( isValidTurn === false){
+  if (isValidTurn === false) {
     console.log("bruh");
     res.send({
       message: "Not your turn",
@@ -571,7 +496,6 @@ Game.drawCard = async (req, res) => {
     });
     return;
   }
-
 
   const card = top_deck;
   playerInfo.hand?.push(card);

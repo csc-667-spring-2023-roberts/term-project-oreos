@@ -10,10 +10,9 @@ block content
     h1 Game #{id} Page (Authenticated)
 
   input(class="quit-btn" id="quit-btn-id" type='button' value='Quit' onclick="saveGameState()")
-  input(class="quit-btn" id="quit-btn-id" type='button' value='Start Game' onclick="startGame")
+  input(class="quit-btn" id="quit-btn-id" type='button' value='Start Game' onclick="initCards()")
 
   h3(id="num-of-players-id" class="num-players") Number of Players: 
-
 
   //- Gameplay screen
   div(class='pile-container')
@@ -30,8 +29,8 @@ block content
 
   div(class="call-uno-container" id="call-uno-container-id")
     h3(id="call-uno-msg-id")
-  
 
+  h3(id="game-msg-id" style="color: yellow; padding: 10px;")
 
   //- Hands
   div(class="game-container")
