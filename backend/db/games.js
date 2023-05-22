@@ -110,6 +110,29 @@ const getPlayerCards = async (game_id, user_id) => {
   );
 };
 
+const getPlayerTurn = async (game_id, user_id) => {
+  const result = await db.one(
+    "SELECT turn FROM game_users WHERE game_id=$1 AND user_id=$2",
+    [game_id, user_id]
+  );
+  return parseInt(result.turn);
+};
+
+const getCurrentGamePosition = async (game_id) => {
+  const result = await db.one(
+    "SELECT position FROM games WHERE id=$1",
+    game_id
+  );
+  return parseInt(result.position);
+};
+
+const updateGamePosition = async (game_id, position) => {
+  return await db.oneOrNone(
+    "UPDATE games SET position=$2 WHERE id=$1 RETURNING position",
+    [game_id, position]
+  );
+};
+
 module.exports = {
   create,
   getAll,
@@ -125,4 +148,7 @@ module.exports = {
   isPlayerStarted,
   isPlayerExist,
   getPlayerCards,
+  getPlayerTurn,
+  getCurrentGamePosition,
+  updateGamePosition,
 };

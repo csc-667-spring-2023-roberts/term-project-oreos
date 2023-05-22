@@ -338,8 +338,8 @@ Game.playCard = async (req, res) => {
   //loop through players, if uid matches then assign playerInfo
   for (let i = 0; i < players.length; i++) {
     if (user_id === players[i].user_id) {
-      // let idx = Array.from(players[i].hand.indexOf(card_id));
-      // players[i].hand.splice(idx, 1);
+      let idx = Array.from(players[i].hand.indexOf(card_id));
+      players[i].hand.splice(idx, 1);
       playerInfo = players[i];
     }
   }
@@ -419,6 +419,10 @@ const checkUNORules = (card_id, playerHand) => {
     console.log("When Card matches 1: " + playerHand);
     return true;
   }
+  if(playedColor === 4){
+    console.log("Special card");
+    return true;
+  }
 
   // for (let card of playerHand) {
   //   const cardColor = parseInt(card.split("-")[0]);
@@ -434,6 +438,26 @@ const checkUNORules = (card_id, playerHand) => {
 }; 
 
 
+
+const checkTurn = async (game_id, user_id) => {
+  let playerTurn = await Games.getPlayerTurn(game_id, user_id);
+  console.log("playerTurn: " + playerTurn);
+  let gamePosition = await Games.getCurrentGamePosition(game_id);
+  console.log("gamePosition: " + gamePosition);
+  console.log("playerTurn === gamePosition: " + playerTurn === gamePosition);
+  return playerTurn === gamePosition;
+};
+
+const updateGamePosition = async (game_id) => {
+  let maxPlayers = players.length;
+  if (position === maxPlayers - 1) {
+    position = 0;
+    await Games.updateGamePosition(game_id, position);
+  } else {
+    position++;
+    await Games.updateGamePosition(game_id, position);
+  }
+};
 
 
 
@@ -538,6 +562,16 @@ Game.drawCard = async (req, res) => {
     });
     return;
   }
+  const isValidTurn = await checkTurn(game_id, user_id);
+  if( isValidTurn === false){
+    console.log("bruh");
+    res.send({
+      message: "Not your turn",
+      status: 400,
+    });
+    return;
+  }
+
 
   const card = top_deck;
   playerInfo.hand?.push(card);
@@ -569,6 +603,8 @@ Game.drawCard = async (req, res) => {
     top_discard.split(".")[0],
     position
   );
+
+  await updateGamePosition(game_id);
 
   io.in(game_id).emit(DRAW_CARD, {
     game_id,
