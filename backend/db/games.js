@@ -140,6 +140,15 @@ const updateGamePosition = async (game_id, position) => {
   );
 };
 
+const getUserID = async (game_id, turn) => {
+  const result = await db.one(
+    "SELECT user_id FROM game_users WHERE game_id=$1 AND turn=$2",
+    [game_id, turn]
+  );
+  return parseInt(result.user_id);
+};
+
+
 module.exports = {
   create,
   getAll,
@@ -159,4 +168,5 @@ module.exports = {
   getCurrentGamePosition,
   updateGamePosition,
   getCurrentPlayerName,
+  getUserID,
 };
