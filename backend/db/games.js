@@ -118,6 +118,13 @@ const getPlayerTurn = async (game_id, user_id) => {
   return parseInt(result.turn);
 };
 
+const getCurrentPlayerName = async (game_id, position) => {
+  return await db.oneOrNone(
+    "SELECT username FROM game_users AS gu INNER JOIN users AS u ON gu.user_id=u.id WHERE gu.game_id=$1 AND gu.turn=$2",
+    [game_id, position]
+  );
+};
+
 const getCurrentGamePosition = async (game_id) => {
   const result = await db.one(
     "SELECT position FROM games WHERE id=$1",
@@ -151,4 +158,5 @@ module.exports = {
   getPlayerTurn,
   getCurrentGamePosition,
   updateGamePosition,
+  getCurrentPlayerName,
 };

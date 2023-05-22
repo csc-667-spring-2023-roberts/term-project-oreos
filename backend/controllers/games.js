@@ -57,6 +57,12 @@ const getCardID = (str) => {
   return null;
 };
 
+const getCurrentPlayerName = async (game_id) => {
+  const player = await Games.getCurrentPlayerName(game_id, position);
+  const username = "Current Turn: " + player?.username;
+  return username;
+};
+
 const getRandomCard = () => {
   let color, number;
 
@@ -183,6 +189,7 @@ Game.startGame = async (req, res) => {
 
     let isPlayerExist = await Games.isPlayerExist(user_id, game_id);
     isPlayerExist = isPlayerExist?.user_id || null;
+    const currentPlayerName = await getCurrentPlayerName(game_id);
 
     if (isPlayerExist) {
       const userCards = await Games.getAllUserCards(user_id, game_id);
@@ -216,6 +223,7 @@ Game.startGame = async (req, res) => {
         top_discard,
         game_id,
         players,
+        currentPlayerName,
       });
       res.send({
         message: "Game already started",
@@ -268,6 +276,7 @@ Game.startGame = async (req, res) => {
       top_discard,
       game_id,
       players,
+      currentPlayerName,
     });
     res.send({
       message: "Game started",
@@ -356,12 +365,15 @@ Game.playCard = async (req, res) => {
     position
   );
 
+  const currentPlayerName = await getCurrentPlayerName(game_id);
+
   io.in(game_id).emit(PLAY_CARD, {
     card_id,
     game_id,
     user_id,
     top_discard,
     players,
+    currentPlayerName,
   });
   res.send({
     message: "Played card: " + card_id,
@@ -470,12 +482,15 @@ Game.drawCard = async (req, res) => {
       position
     );
 
+    const currentPlayerName = await getCurrentPlayerName(game_id);
+
     io.in(game_id).emit(DRAW_CARD, {
       game_id,
       user_id,
       top_discard,
       top_deck,
       players,
+      currentPlayerName,
     });
 
     res.send({
@@ -530,12 +545,15 @@ Game.drawCard = async (req, res) => {
 
   await updateGamePosition(game_id);
 
+  const currentPlayerName = await getCurrentPlayerName(game_id);
+
   io.in(game_id).emit(DRAW_CARD, {
     game_id,
     user_id,
     top_discard,
     top_deck,
     players,
+    currentPlayerName,
   });
 
   res.send({
