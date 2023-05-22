@@ -288,6 +288,35 @@ Game.endGame = async (req, res) => {
   res.send({ message: "Game ended" });
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ------------------------
 // Play Card
 // ------------------------
@@ -297,46 +326,45 @@ Game.playCard = async (req, res) => {
   // make sure player can play the card
   // handle special hards
 
-  const { game_id, user_id, card_id } = req.body;
+  //user_id = user who played the card
+  //game_id = game where the card was played in
+  //card_id = id of the discard card that needs to be matched with
+  const { game_id, user_id, card_id } = req.body; //extract from the request body
   const io = req.app.get("io");
 
+  //empty arrays for player Info
   let playerInfo = [];
-  let opponentInfo = [];
 
+  //loop through players, if uid matches then assign playerInfo
   for (let i = 0; i < players.length; i++) {
     if (user_id === players[i].user_id) {
-      let idx = Array.from(players[i].hand.indexOf(card_id));
-      players[i].hand.splice(idx, 1);
+      // let idx = Array.from(players[i].hand.indexOf(card_id));
+      // players[i].hand.splice(idx, 1);
       playerInfo = players[i];
-
-    }
-    else{
-      let idx = Array.from(players[i].hand.indexOf(card_id));
-      players[i].hand.splice(idx, 1);
-      opponentInfo = players[i];
     }
   }
 
-    console.log("Player's Hand before checking rule")
-    console.log(playerInfo);
+  console.log("Player's Hand before checking rule")
+  console.log(playerInfo);
 
-    console.log("Opponent's Hand before checking rule")
-    console.log(opponentInfo);
+  //Add your UNO rules condition here
+  const followsUNORules = checkUNORules(card_id, playerInfo.hand);
 
-    // Add your UNO rules condition here
-    const followsUNORules = checkUNORules(card_id, playerInfo.hand);
-
-    if (!followsUNORules) {
-      res.status(400).send({
-        message: "Card does not follow UNO rules: " + card_id,
-        playerInfo: playerInfo,
-        status: 400,
-      });
-      return;
-    }
+  
+  if (!followsUNORules) {
+    res.status(400).send({
+      message: "Card does not follow UNO rules: " + card_id,
+      playerInfo: playerInfo,
+      status: 400,
+    });
+    return;
+  }
 
 
-    top_discard = card_id;
+  console.log("Player's Hand AFTER checking rule")
+  console.log(playerInfo);
+
+  top_discard = card_id;
 
   if (cardsSet.has(top_discard)) {
     cardsSet.delete(top_discard);
@@ -370,11 +398,12 @@ Game.playCard = async (req, res) => {
     playerInfo: playerInfo,
     status: 200,
   });
+
+
 };
 
 // uno rules condition
 const checkUNORules = (card_id, playerHand) => {
-
   // Get the color and number of the played card
   const playedColor = parseInt(card_id.split("-")[0]);
   const playedNumber = parseInt(card_id.split("-")[1]);
@@ -384,27 +413,66 @@ const checkUNORules = (card_id, playerHand) => {
   const topDiscardNumber = parseInt(top_discard.split("-")[1]);
 
   console.log("Player Hand before matching: " + playerHand);
+
   // Check if the played color OR number matched the discard
   if (playedColor === topDiscardColor || playedNumber === topDiscardNumber) {
     console.log("When Card matches 1: " + playerHand);
     return true;
   }
- 
-  for (let card of playerHand) {
-    const cardColor = parseInt(card.split("-")[0]);
-    const cardNumber = parseInt(card.split("-")[1]);
 
-    if (cardColor === topDiscardColor || cardNumber === topDiscardNumber) {
-      console.log("When Card matches 2: " + playerHand);
-      return true;
-    }
-    
-  }
+  // for (let card of playerHand) {
+  //   const cardColor = parseInt(card.split("-")[0]);
+  //   const cardNumber = parseInt(card.split("-")[1]);
+
+  //   if (cardColor === topDiscardColor || cardNumber === topDiscardNumber) {
+  //     console.log("When Card matches 2: " + playerHand);
+  //     return true;
+  //   }
+  // }
 
   return false;
-};
+}; 
 
-// end of Uno rule condition
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Game.drawCard = async (req, res) => {
@@ -519,7 +587,6 @@ Game.drawCard = async (req, res) => {
   });
 };
 
-
 //Call Uno Function
 Game.callUno = async (req, res) => {
   const { game_id } = req.params;
@@ -548,7 +615,6 @@ Game.callUno = async (req, res) => {
   res.send({ message: "Cannot call uno", status: 400 });
 };
 
-
 //Send Message
 Game.sendMessage = async (req, res) => {
   const { message, user_id, username, game_id } = req.body;
@@ -573,7 +639,6 @@ Game.sendMessage = async (req, res) => {
     res.send({ message: "Error sending message", status: 500 });
   }
 };
-
 
 // Get all Messages
 Game.getAllMessages = async (req, res) => {

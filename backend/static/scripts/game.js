@@ -223,7 +223,7 @@ const playCard = async (cardName) => {
   }
 
   const cardUI = document.getElementById(cardName + "-id");
-  cardUI.remove();
+  // cardUI.remove();
 };
 
 //end of PLAY CARD
@@ -262,7 +262,6 @@ const drawCard = async () => {
 
       cardImage.addEventListener("click", async () => {
         console.log("Card played:" + card);
-
         await playCard(card);
       });
 
