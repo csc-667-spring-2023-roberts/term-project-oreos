@@ -328,10 +328,34 @@ const saveGameState = async () => {
   }
 };
 
-const endGame = () => {
-  //TODO implement
-  console.log("game ended");
+const endGame = async () => {
+  const game_id = getGameId(document.location.pathname);
+  const formDataJson = { game_id };
+
+  const options = {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(formDataJson),
+  };
+
+  try {
+    const res = await fetch(`/api/games/${game_id}/end`, options);
+    const data = await res.json();
+
+    if (data.status === 200) {
+      console.log("Game ended");
+      // Perform additional actions as needed, such as displaying end game messages, declaring a winner, updating scores, etc.
+      window.location.href = "/lobby";
+    } else {
+      console.log("Error ending game");
+    }
+  } catch (err) {
+    console.log(err);
+  }
 };
+
 
 const delayInitCards = () => {
   const delay = Math.random() * 1100 + 700;

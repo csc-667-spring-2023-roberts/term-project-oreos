@@ -282,64 +282,108 @@ Game.startGame = async (req, res) => {
 };
 
 Game.endGame = async (req, res) => {
-  // TODO implement
+  if (player.hand.length === 0) {
+    // Game ended
+    // Perform necessary actions for game end
+    await Games.setGameOngoing(false, game_id); // Update game status as not ongoing
+    io.in(game_id).emit(END_GAME); // Emit an event to notify the end of the game
+    // Perform additional actions as needed, such as declaring a winner, updating scores, etc.
+  }
+  
   res.send({ message: "Game ended" });
 };
 
 Game.playCard = async (req, res) => {
-  // make sure user is in the game
-  // make sure player turn
-  // make sure player can play the card
-  // handle special hards
-
   const { game_id, user_id, card_id } = req.body;
   const io = req.app.get("io");
+  const player = players.find((player) => player.user_id === user_id);
+  if (!player) {
+    res.send({ message: "Player not found", status: 400 });
+    return;
+  }
 
-  let playerInfo = [];
+  if (player.user_id !== user_id) {
+    res.send({ message: "Not the player's turn", status: 400 });
+    return;
+  }
 
-  for (let i = 0; i < players.length; i++) {
-    if (user_id === players[i].user_id) {
-      let idx = Array.from(players[i].hand.indexOf(card_id));
-      players[i].hand.splice(idx, 1);
-      playerInfo = players[i];
+  if (!isValidCard(card_id)) {
+    res.send({ message: "Invalid card", status: 400 });
+    return;
+  }
+
+  const cardIndex = player.hand.indexOf(card_id);
+  if (cardIndex !== -1) {
+    const card = player.hand[cardIndex];
+    top_discard = card;
+
+    await Games.saveGameState(
+      game_id,
+      top_deck.split(".")[0],
+      top_discard.split(".")[0],
+      position
+    );
+
+    io.in(game_id).emit(PLAY_CARD, {
+      card_id,
+      game_id,
+      user_id,
+      top_discard,
+      players,
+    });
+
+    player.hand.splice(cardIndex, 1); // Remove the card from the player's hand
+
+    if (player.hand.length === 0) {
+      // Game ended
+      await Games.setGameOngoing(false, game_id); // Update game status as not ongoing
+      io.in(game_id).emit(END_GAME); // Emit an event to notify the end of the game
+      // Perform additional actions as needed, such as declaring a winner, updating scores, etc.
     }
+
+    res.send({
+      message: "Played card: " + card_id,
+      playerInfo: player,
+      status: 200,
+    });
+  } else {
+    res.send({ message: "Card not found in player's hand", status: 400 });
   }
-
-  top_discard = card_id;
-
-  if (cardsSet.has(top_discard)) {
-    cardsSet.delete(top_discard);
-  }
-
-  let cardID_arr = getCardID(card_id);
-  let playedCardIDs = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
-  await user_cards.playCard(
-    game_id,
-    user_id,
-    playedCardIDs,
-    playedCardIDs.length
-  );
-
-  await Games.saveGameState(
-    game_id,
-    top_deck.split(".")[0],
-    top_discard.split(".")[0],
-    position
-  );
-
-  io.in(game_id).emit(PLAY_CARD, {
-    card_id,
-    game_id,
-    user_id,
-    top_discard,
-    players,
-  });
-  res.send({
-    message: "Played card: " + card_id,
-    playerInfo: playerInfo,
-    status: 200,
-  });
 };
+
+Game.endGame = async (req, res) => {
+  const { game_id } = req.body;
+  const io = req.app.get("io");
+
+  await Games.setGameOngoing(false, game_id); // Update game status as not ongoing
+  io.in(game_id).emit(END_GAME); // Emit an event to notify the end of the game
+  // Perform additional actions as needed, such as declaring a winner, updating scores, etc.
+
+  res.send({ message: "Game ended" });
+};
+
+
+
+const isValidCard = (card_id) => {
+  const [playedColor, playedNumber] = getCardID(card_id);
+  const [topDiscardColor, topDiscardNumber] = getCardID(top_discard);
+  console.log(playedColor);
+  console.log(topDiscardColor);
+  if (playedColor === topDiscardColor || playedNumber === topDiscardNumber) {
+    return true;
+  }
+
+  // if (playedColor === 4) {
+  //   return true;
+  // }
+
+  // if (playedNumber === 14) {
+  //   return true;
+  // }
+
+  return false;
+};
+
 
 Game.drawCard = async (req, res) => {
   const { game_id, user_id } = req.body;
