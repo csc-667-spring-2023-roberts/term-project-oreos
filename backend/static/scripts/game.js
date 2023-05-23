@@ -28,6 +28,44 @@ const showUnoCallButton = () => {
   }, 10000);
 };
 
+const showColors = () => {
+  const redButton = document.createElement("red-button");
+  const blueButton = document.createElement("blue-button");
+  const greenButton = document.createElement("green-button");
+  const yellowButton = document.createElement("yellow-button");
+
+  redButton.innerHTML = "RED";
+  blueButton.innerHTML = "BLUE";
+  greenButton.innerHTML = "GREEN";
+  yellowButton.innerHTML = "YELLOW";
+
+  redButton.onclick = function () {
+    
+  };
+
+  blueButton.onclick = function () {
+    
+  };
+
+  greenButton.onclick = function () {
+    
+  };
+
+  yellowButton.onclick = function () {
+    
+  };
+
+  redButton.id = "red-button-id";
+  blueButton.id = "blue-button-id";
+  greenButton.id = "green-button-id";
+  yellowButton.id = "yellow-button-id";
+  document.getElementById("red-container-id").appendChild(redButton);
+  document.getElementById("blue-container-id").appendChild(blueButton);
+  document.getElementById("green-container-id").appendChild(greenButton);
+  document.getElementById("yellow-container-id").appendChild(yellowButton);
+
+}
+
 const getUserSession = async () => {
   try {
     const res = await fetch("/api/users/user-session");
@@ -251,9 +289,9 @@ const playCard = async (cardName) => {
   } catch (err) {
     console.log(err);
   }
+
 };
 
-//end of PLAY CARD
 
 const drawCard = async () => {
   const formDataJson = {};
