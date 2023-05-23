@@ -115,19 +115,26 @@ const updateOpponentCards = (players) => {
   });
 };
 
-socket.on(START_GAME, ({ top_deck, top_discard, players }) => {
-  if (
-    !document.getElementById("deck-img-id") ||
-    !document.getElementById("discard-img-id")
-  ) {
-    return;
+socket.on(
+  START_GAME,
+  ({ top_deck, top_discard, players, currentPlayerName }) => {
+    console.log(currentPlayerName);
+    if (
+      !document.getElementById("deck-img-id") ||
+      !document.getElementById("discard-img-id") ||
+      !document.getElementById("current-player-name-id")
+    ) {
+      return;
+    }
+
+    document.getElementById("deck-img-id").src = imgPath + top_deck;
+    document.getElementById("discard-img-id").src = imgPath + top_discard;
+    document.getElementById("current-player-name-id").innerText =
+      currentPlayerName;
+
+    updateOpponentCards(players);
   }
-
-  document.getElementById("deck-img-id").src = imgPath + top_deck;
-  document.getElementById("discard-img-id").src = imgPath + top_discard;
-
-  updateOpponentCards(players);
-});
+);
 
 socket.on(JOIN_GAME, ({ message, numPlayers }) => {
   if (!document.getElementById("num-of-players-id")) {
@@ -155,13 +162,24 @@ socket.on(LEAVE_GAME, ({ message, numPlayers }) => {
   showMessage(message);
 });
 
-socket.on(PLAY_CARD, ({ top_discard, players }) => {
-  document.getElementById("discard-img-id").src = imgPath + top_discard;
-  updateOpponentCards(players);
-});
+socket.on(
+  PLAY_CARD,
+  ({ top_discard, game_id, players, currentPlayerName, draw2CardsUserId }) => {
+    if (draw2CardsUserId && draw2CardsUserId === user.id) {
+      window.location.href = `/games/${game_id}`;
+      return;
+    }
+    document.getElementById("discard-img-id").src = imgPath + top_discard;
+    document.getElementById("current-player-name-id").innerText =
+      currentPlayerName;
+    updateOpponentCards(players);
+  }
+);
 
-socket.on(DRAW_CARD, ({ top_deck, players }) => {
+socket.on(DRAW_CARD, ({ top_deck, players, currentPlayerName }) => {
   document.getElementById("deck-img-id").src = imgPath + top_deck;
+  document.getElementById("current-player-name-id").innerText =
+    currentPlayerName;
   updateOpponentCards(players);
 });
 
