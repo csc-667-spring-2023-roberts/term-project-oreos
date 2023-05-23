@@ -26,14 +26,6 @@ body {
   background-color: #095d63;
 }
 
-.game-form-container {
-  max-height: 300px;
-  max-width: 100%;
-  text-align: center;
-  border: 2px solid black;
-  padding: 10px;
-}
-
 .register {
   height: 80%;
   width: 100%;
