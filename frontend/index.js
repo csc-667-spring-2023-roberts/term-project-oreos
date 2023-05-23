@@ -1,4 +1,3 @@
-console.log("Hello from a bundled  assetsss.");
 import io from "socket.io-client";
 import { getGameId } from "./get-game-id";
 import { showMessage } from "./show-alert-message";
@@ -41,7 +40,7 @@ socket.on(CREATE_GAME, ({ gametitle, count, game_id, ongoing }) => {
   }
 
   let li = document.createElement("div");
-  li.style.backgroundColor = "rgb(59, 245, 149)";
+  li.style.backgroundColor = "rgb(139, 246, 210)";
   li.style.marginBottom = "1px";
   li.innerHTML = `<a class="game-room-link" href="/waitingroom/${game_id}">Title: ${gametitle}, # ${game_id} Players: ${count}, Started: ${ongoing}</a>`;
   gamesList.appendChild(li);
@@ -65,7 +64,24 @@ socket.on(CHAT, ({ message, username }) => {
   let li = document.createElement("div");
   li.style.backgroundColor = "rgb(59, 245, 149)";
   li.style.marginBottom = "1px";
-  li.innerHTML = `${username} ${createdAtFormatted}: ${message}`;
+
+  let usernameSpan = document.createElement("span");
+  usernameSpan.style.fontWeight = "bold";
+  usernameSpan.textContent = username;
+
+  let createdAtSpan = document.createElement("span");
+  createdAtSpan.style.marginLeft = "5px";
+  createdAtSpan.textContent = createdAtFormatted;
+
+  let messageP = document.createElement("p");
+  messageP.style.margin = "5px";
+  messageP.textContent = message;
+
+  li.appendChild(usernameSpan);
+  li.appendChild(createdAtSpan);
+  li.appendChild(document.createTextNode(": "));
+  li.appendChild(messageP);
+
   chatList.appendChild(li);
 });
 

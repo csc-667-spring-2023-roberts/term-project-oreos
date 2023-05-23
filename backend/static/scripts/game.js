@@ -95,6 +95,17 @@ const addCardsToPlayerHand = () => {
     cardImage.setAttribute("width", "100px");
     cardImage.setAttribute("height", "135px");
 
+    cardImage.style.transition = "transform 0.3s ease";
+    cardImage.style.transformOrigin = "center";
+
+    cardImage.addEventListener("mouseover", () => {
+      cardImage.style.transform = "scale(1.1)";
+    });
+
+    cardImage.addEventListener("mouseout", () => {
+      cardImage.style.transform = "scale(1)";
+    });
+
     cardImage.addEventListener("click", async () => {
       await playCard(card);
     });
@@ -179,7 +190,23 @@ const getAllMessages = async () => {
         minute: "numeric",
       });
 
-      li.innerHTML = `${msg.username} ${createdAtFormatted}: ${msg.message}`;
+      let usernameSpan = document.createElement("span");
+      usernameSpan.style.fontWeight = "bold";
+      usernameSpan.textContent = msg.username;
+
+      let createdAtSpan = document.createElement("span");
+      createdAtSpan.style.marginLeft = "5px";
+      createdAtSpan.textContent = createdAtFormatted;
+
+      let messageP = document.createElement("p");
+      messageP.style.margin = "5px";
+      messageP.textContent = msg.message;
+
+      li.appendChild(usernameSpan);
+      li.appendChild(createdAtSpan);
+      li.appendChild(document.createTextNode(": "));
+      li.appendChild(messageP);
+
       chatList.appendChild(li);
     });
   } catch (err) {
