@@ -162,12 +162,19 @@ socket.on(LEAVE_GAME, ({ message, numPlayers }) => {
   showMessage(message);
 });
 
-socket.on(PLAY_CARD, ({ top_discard, players, currentPlayerName }) => {
-  document.getElementById("discard-img-id").src = imgPath + top_discard;
-  document.getElementById("current-player-name-id").innerText =
-    currentPlayerName;
-  updateOpponentCards(players);
-});
+socket.on(
+  PLAY_CARD,
+  ({ top_discard, game_id, players, currentPlayerName, draw2CardsUserId }) => {
+    if (draw2CardsUserId && draw2CardsUserId === user.id) {
+      window.location.href = `/games/${game_id}`;
+      return;
+    }
+    document.getElementById("discard-img-id").src = imgPath + top_discard;
+    document.getElementById("current-player-name-id").innerText =
+      currentPlayerName;
+    updateOpponentCards(players);
+  }
+);
 
 socket.on(DRAW_CARD, ({ top_deck, players, currentPlayerName }) => {
   document.getElementById("deck-img-id").src = imgPath + top_deck;

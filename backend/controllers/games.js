@@ -344,34 +344,35 @@ Game.playCard = async (req, res) => {
     return;
   }
 
+  let draw2CardsUserId = "";
   if (user_id === playerInfo.user_id) {
     let idx = Array.from(playerInfo.hand.indexOf(card_id));
     playerInfo.hand.splice(idx, 1);
   }
 
   const playedNumber = parseInt(card_id.split("-")[1]);
-  if(playedNumber === 10){
-    if(isInReverse){
+
+  if (playedNumber === 10) {
+    if (isInReverse) {
       console.log("reverse skip");
       await skipNextPlayerReverse();
-    }else{
+    } else {
       console.log("skip");
       await skipNextPlayer();
     }
   }
-  if(playedNumber === 11){
-    if(isInReverse){
+  if (playedNumber === 11) {
+    if (isInReverse) {
       await updatePosition(game_id);
     } else {
       await reverseGameOrder(game_id);
     }
   }
-  if(playedNumber === 12){
+  if (playedNumber === 12) {
     //reverse not implemented yet
-    await drawTwoCards(game_id);
+    const draw2UserId = await drawTwoCards(game_id);
+    draw2CardsUserId = draw2UserId;
   }
-
-
 
   console.log("Player's Hand AFTER checking rule");
   console.log(playerInfo);
@@ -397,7 +398,7 @@ Game.playCard = async (req, res) => {
     top_discard.split(".")[0],
     position
   );
-  
+
   const currentPlayerName = await getCurrentPlayerName(game_id);
 
   io.in(game_id).emit(PLAY_CARD, {
@@ -407,15 +408,17 @@ Game.playCard = async (req, res) => {
     top_discard,
     players,
     currentPlayerName,
+    draw2CardsUserId,
   });
   res.send({
     message: "Played card: " + card_id,
     playerInfo: playerInfo,
     status: 200,
   });
-  if(playedNumber === 10 || playedNumber === 11 || playedNumber === 12) {
+
+  if (playedNumber === 10 || playedNumber === 11 || playedNumber === 12) {
     //do nothing, since we already skipped the next player
-  } else if(isInReverse){
+  } else if (isInReverse) {
     await reverseGameOrder(game_id);
   } else {
     await updatePosition(game_id);
@@ -476,7 +479,6 @@ const updatePosition = async (game_id) => {
   }
   isInReverse = false;
   await Games.updateGamePosition(game_id, position);
-
 };
 
 const reverseGameOrder = async (game_id) => {
@@ -488,43 +490,40 @@ const reverseGameOrder = async (game_id) => {
   }
   isInReverse = true;
   await Games.updateGamePosition(game_id, position);
-
 };
 
 const skipNextPlayer = async (game_id) => {
   let maxPlayers = players.length;
   if (position === maxPlayers - 1) {
     position = 1;
-  }
-  else if (position === maxPlayers - 2) {
+  } else if (position === maxPlayers - 2) {
     position = 0;
   } else {
     position += 2;
   }
-  console.log("position: " + position)
+  console.log("position: " + position);
   await Games.updateGamePosition(game_id, position);
-
 };
 
 const skipNextPlayerReverse = async (game_id) => {
   let maxPlayers = players.length;
   if (position === 0) {
     position = maxPlayers - 2;
-  } else if(position === 1) {
+  } else if (position === 1) {
     position = maxPlayers - 1;
   } else {
     position -= 2;
   }
   await Games.updateGamePosition(game_id, position);
-  
 };
 
 const drawTwoCards = async (game_id) => {
   let randomCard1 = getRandomCard();
   let randomCard2 = getRandomCard();
-  //you might need these for the front end?? idk 
+  //you might need these for the front end?? idk
   let card1 = `${randomCard1[0]}-${randomCard1[1]}.png`;
   let card2 = `${randomCard2[0]}-${randomCard2[1]}.png`;
+
   //get position of player that is drawing the cards
   let maxPlayers = players.length;
   if (position === maxPlayers - 1) {
@@ -532,19 +531,21 @@ const drawTwoCards = async (game_id) => {
   } else {
     position++;
   }
-  console.log("player drawing cards position: " + position)
+
+  console.log("player drawing cards position: " + position);
   const user_id = await Games.getUserID(game_id, position);
   await drawACard(card1, game_id, user_id);
   await drawACard(card2, game_id, user_id);
   //now skip that player's turn
-  if(position === maxPlayers - 1) {
+  if (position === maxPlayers - 1) {
     position = 0;
   } else {
     position++;
   }
-  console.log("position after drawing cards: " + position)
+
+  console.log("position after drawing cards: " + position);
   await Games.updateGamePosition(game_id, position);
-  
+  return user_id;
 };
 
 const drawACard = async (card, game_id, user_id) => {
@@ -553,22 +554,6 @@ const drawACard = async (card, game_id, user_id) => {
   await user_cards.drawCard(game_id, user_id, card_id);
 };
 //leave space here for now
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Game.drawCard = async (req, res) => {
   const { game_id, user_id } = req.body;
