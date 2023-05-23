@@ -15,7 +15,7 @@
     "db:create": "node-pg-migrate create -- ",
     "db:migrate": "node-pg-migrate up",
     "db:rollback": "node-pg-migrate down",
-    "postinstall": "npm run db:migrate"
+    "postinstall": "npm run db:rollback && npm run db:migrate"
   },
   "keywords": [],
   "author": "",
