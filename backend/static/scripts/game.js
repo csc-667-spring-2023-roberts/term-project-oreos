@@ -3,15 +3,15 @@ let players = [];
 const imgPath = "../images/";
 
 const showMessage = (data) => {
-  if (!document.getElementById("msg-id")) {
+  if (!document.getElementById("game-msg-id")) {
     return;
   }
 
-  document.getElementById("msg-id").innerText = data.message;
+  document.getElementById("game-msg-id").innerText = data.message;
 
   setTimeout(() => {
-    document.getElementById("msg-id").innerText = "";
-  }, 10000);
+    document.getElementById("game-msg-id").innerText = "";
+  }, 6000);
 };
 
 const showUnoCallButton = () => {
@@ -214,13 +214,15 @@ const getAllMessages = async () => {
   }
 };
 
+// PLAY CARD
 const playCard = async (cardName) => {
   const formDataJson = {};
 
   const game_id = getGameId(document.location.pathname);
   formDataJson["game_id"] = game_id;
-  formDataJson["user_id"] = 1;
   formDataJson["card_id"] = cardName;
+  const userSession = await getUserSession();
+  formDataJson["user_id"] = userSession.id;
 
   const options = {
     method: "PUT",
@@ -235,26 +237,29 @@ const playCard = async (cardName) => {
     const data = await res.json();
     playerInfo = data.playerInfo;
 
-    if (playerInfo.hand.length === 1) {
-      showUnoCallButton();
-    }
-
     if (data.status === 400 || data.status === 500) {
       showMessage(data);
       return;
     }
+
+    if (playerInfo.hand.length === 1) {
+      showUnoCallButton();
+    }
+
+    const cardUI = document.getElementById(cardName + "-id");
+    cardUI.remove();
   } catch (err) {
     console.log(err);
   }
-
-  const cardUI = document.getElementById(cardName + "-id");
-  cardUI.remove();
 };
+
+//end of PLAY CARD
 
 const drawCard = async () => {
   const formDataJson = {};
 
-  formDataJson["user_id"] = 1;
+  const userSession = await getUserSession();
+  formDataJson["user_id"] = userSession.id;
   const game_id = getGameId(document.location.pathname);
   formDataJson["game_id"] = game_id;
 
@@ -270,12 +275,17 @@ const drawCard = async () => {
     const res = await fetch(`/api/games/${game_id}/draw`, options);
     const data = await res.json();
 
+    if (data.status === 400 || data.status === 500) {
+      showMessage(data);
+      return;
+    }
+
     let playerInfoNewCards = data.playerInfoNewCards;
     playerInfo = data.playerInfo;
 
     const playerHandUI = document.getElementById("player-hand-id");
 
-    playerInfoNewCards.hand.forEach((card) => {
+    playerInfoNewCards?.hand.forEach((card) => {
       const cardImage = document.createElement("img");
       cardImage.id = card + "-id";
       cardImage.setAttribute("src", `${imgPath}${card}`);
@@ -284,17 +294,10 @@ const drawCard = async () => {
       cardImage.setAttribute("height", "135px");
 
       cardImage.addEventListener("click", async () => {
-        console.log("Card played:" + card);
-
         await playCard(card);
       });
 
       playerHandUI.appendChild(cardImage);
-
-      if (data.status === 400 || data.status === 500) {
-        showMessage(data);
-        return;
-      }
     });
   } catch (err) {
     console.log(err);
@@ -345,12 +348,13 @@ const saveGameState = async () => {
   try {
     const res = await fetch(`/api/games/${game_id}/state`, options);
     const data = await res.json();
-    window.location.href = "/lobby";
 
     if (data.status === 400 || data.status === 500) {
       showMessage(data);
       return;
     }
+
+    window.location.href = "/lobby";
   } catch (err) {
     console.log(err);
   }

@@ -115,19 +115,26 @@ const updateOpponentCards = (players) => {
   });
 };
 
-socket.on(START_GAME, ({ top_deck, top_discard, players }) => {
-  if (
-    !document.getElementById("deck-img-id") ||
-    !document.getElementById("discard-img-id")
-  ) {
-    return;
+socket.on(
+  START_GAME,
+  ({ top_deck, top_discard, players, currentPlayerName }) => {
+    console.log(currentPlayerName);
+    if (
+      !document.getElementById("deck-img-id") ||
+      !document.getElementById("discard-img-id") ||
+      !document.getElementById("current-player-name-id")
+    ) {
+      return;
+    }
+
+    document.getElementById("deck-img-id").src = imgPath + top_deck;
+    document.getElementById("discard-img-id").src = imgPath + top_discard;
+    document.getElementById("current-player-name-id").innerText =
+      currentPlayerName;
+
+    updateOpponentCards(players);
   }
-
-  document.getElementById("deck-img-id").src = imgPath + top_deck;
-  document.getElementById("discard-img-id").src = imgPath + top_discard;
-
-  updateOpponentCards(players);
-});
+);
 
 socket.on(JOIN_GAME, ({ message, numPlayers }) => {
   if (!document.getElementById("num-of-players-id")) {
@@ -155,13 +162,17 @@ socket.on(LEAVE_GAME, ({ message, numPlayers }) => {
   showMessage(message);
 });
 
-socket.on(PLAY_CARD, ({ top_discard, players }) => {
+socket.on(PLAY_CARD, ({ top_discard, players, currentPlayerName }) => {
   document.getElementById("discard-img-id").src = imgPath + top_discard;
+  document.getElementById("current-player-name-id").innerText =
+    currentPlayerName;
   updateOpponentCards(players);
 });
 
-socket.on(DRAW_CARD, ({ top_deck, players }) => {
+socket.on(DRAW_CARD, ({ top_deck, players, currentPlayerName }) => {
   document.getElementById("deck-img-id").src = imgPath + top_deck;
+  document.getElementById("current-player-name-id").innerText =
+    currentPlayerName;
   updateOpponentCards(players);
 });
 
