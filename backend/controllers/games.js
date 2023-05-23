@@ -18,7 +18,8 @@ let players = [];
 let hostPlayer = {};
 let cardsSet = new Set();
 let isInReverse = false;
-
+let draw4AfterPosition = 0;
+let draws = 0;
 const shuffleCards = (cards) => {
   let temp = null;
   for (let i = cards.length - 1; i > 0; i -= 1) {
@@ -370,8 +371,31 @@ Game.playCard = async (req, res) => {
   }
   if (playedNumber === 12) {
     //reverse not implemented yet
-    const draw2UserId = await drawTwoCards(game_id);
-    draw2CardsUserId = draw2UserId;
+    if(isInReverse){
+      const draw2UserId = await drawTwoCardsReverse(game_id);
+      draw2CardsUserId = draw2UserId;
+    } else {
+      const draw2UserId = await drawTwoCards(game_id);
+      draw2CardsUserId = draw2UserId;
+    }
+
+  }
+  if (playedNumber === 13) {
+    if(isInReverse) {
+      await wildCardReverse(game_id);
+    }
+    else {
+      await wildCard(game_id);
+    }
+  }
+
+  if (playedNumber === 14) {
+    if(isInReverse) {
+      const draw4UserId = await drawFourCardsReverse(game_id);
+    }
+    else {
+      const draw4UserId = await drawFourCards(game_id);
+    }
   }
 
   console.log("Player's Hand AFTER checking rule");
@@ -416,13 +440,29 @@ Game.playCard = async (req, res) => {
     status: 200,
   });
 
-  if (playedNumber === 10 || playedNumber === 11 || playedNumber === 12) {
-    //do nothing, since we already skipped the next player
+  if (playedNumber === 10 || playedNumber === 11 || playedNumber === 12 || playedNumber === 13 || playedNumber === 14) {
+    if(playedNumber === 13 || playedNumber === 14) {
+      draws++;
+    }
   } else if (isInReverse) {
-    await reverseGameOrder(game_id);
+    if(draws === 1) {
+      draws=0;
+      position = draw4AfterPosition;
+      await reverseGameOrder(game_id);
+    } else {
+      await reverseGameOrder(game_id);
+    }
   } else {
-    await updatePosition(game_id);
+    if(draws === 1) {
+      draws=0;
+      position = draw4AfterPosition;
+      await updatePosition(game_id);
+    } else {
+      await updatePosition(game_id);
+    }
   }
+
+  
 
 };
 
@@ -447,6 +487,10 @@ const checkUNORules = (card_id, playerHand) => {
     console.log("Special card");
     return true;
   }
+  if(topDiscardColor === 4) {
+    return true;
+  }
+
 
   // for (let card of playerHand) {
   //   const cardColor = parseInt(card.split("-")[0]);
@@ -548,7 +592,166 @@ const drawTwoCards = async (game_id) => {
   return user_id;
 };
 
-const drawACard = async (card, game_id, user_id) => {
+const drawTwoCardsReverse = async (game_id) => {
+  let randomCard1 = getRandomCard();
+  let randomCard2 = getRandomCard();
+  //you might need these for the front end?? idk
+  let card1 = `${randomCard1[0]}-${randomCard1[1]}.png`;
+  let card2 = `${randomCard2[0]}-${randomCard2[1]}.png`;
+
+  //get position of player that is drawing the cards
+  let maxPlayers = players.length;
+  if (position === 0) {
+    position = maxPlayers - 1;
+  } else {
+    position--;
+  }
+
+  console.log("player drawing cards position: " + position);
+  const user_id = await Games.getUserID(game_id, position);
+  await drawACard(card1, game_id, user_id);
+  await drawACard(card2, game_id, user_id);
+  //now skip that player's turn
+  if (position === 0) {
+    position = maxPlayers - 1;
+  } else {
+    position--;
+  }
+
+  console.log("position after drawing cards: " + position);
+  await Games.updateGamePosition(game_id, position);
+  return user_id;
+};
+
+const drawFourCards = async (game_id) => {
+  let randomCard1 = getRandomCard();
+  let randomCard2 = getRandomCard();
+  let randomCard3 = getRandomCard();
+  let randomCard4 = getRandomCard();
+  //you might need these for the front end?? idk
+  let card1 = `${randomCard1[0]}-${randomCard1[1]}.png`;
+  let card2 = `${randomCard2[0]}-${randomCard2[1]}.png`;
+  let card3 = `${randomCard3[0]}-${randomCard3[1]}.png`;
+  let card4 = `${randomCard4[0]}-${randomCard4[1]}.png`;
+
+  //get position of player that is drawing the cards
+  let maxPlayers = players.length;
+  if (position === maxPlayers - 1) {
+    position = 0;
+  } else {
+    position++;
+  }
+  
+  console.log("player drawing cards position: " + position);
+  const user_id = await Games.getUserID(game_id, position);
+  await drawACard(card1, game_id, user_id);
+  await drawACard(card2, game_id, user_id);
+  await drawACard(card3, game_id, user_id);
+  await drawACard(card4, game_id, user_id);
+  // go back to player to played the draw 4 card
+  draw4AfterPosition = position;
+  if (draw4AfterPosition === maxPlayers - 1) {
+    draw4AfterPosition = 0;
+  } else {
+    draw4AfterPosition++;
+  }
+  if (position === 0) {
+    position = maxPlayers - 1;
+  } else {
+    position--;
+  }
+
+
+  console.log("position after drawing cards: " + position);
+  await Games.updateGamePosition(game_id, position);
+  return user_id;
+};
+
+const drawFourCardsReverse = async (game_id) => {
+  let randomCard1 = getRandomCard();
+  let randomCard2 = getRandomCard();
+  let randomCard3 = getRandomCard();
+  let randomCard4 = getRandomCard();
+  //you might need these for the front end?? idk
+  let card1 = `${randomCard1[0]}-${randomCard1[1]}.png`;
+  let card2 = `${randomCard2[0]}-${randomCard2[1]}.png`;
+  let card3 = `${randomCard3[0]}-${randomCard3[1]}.png`;
+  let card4 = `${randomCard4[0]}-${randomCard4[1]}.png`;
+
+  //get position of player that is drawing the cards
+  let maxPlayers = players.length;
+  if (position === 0) {
+    position = maxPlayers - 1;
+  } else {
+    position--;
+  }
+
+  console.log("player drawing cards position: " + position);
+  const user_id = await Games.getUserID(game_id, position);
+  await drawACard(card1, game_id, user_id);
+  await drawACard(card2, game_id, user_id);
+  await drawACard(card3, game_id, user_id);
+  await drawACard(card4, game_id, user_id);
+  // go back to player to played the draw 4 card
+  draw4AfterPosition = position;
+  if (draw4AfterPosition === 0) {
+    draw4AfterPosition = maxPlayers - 1;
+  } else {
+    draw4AfterPosition--;
+  }
+  if (position === maxPlayers - 1) {
+    position = 0;
+  } else {
+    position++;
+  }
+
+  console.log("position after drawing cards: " + position);
+  await Games.updateGamePosition(game_id, position);
+  return user_id;
+};
+
+const wildCard = async (game_id) => {
+  //get position of player that is drawing the cards
+  let maxPlayers = players.length;
+  draw4AfterPosition = position;
+  if (draw4AfterPosition === maxPlayers - 1) {
+    draw4AfterPosition = 0;
+  } else {
+    draw4AfterPosition++;
+  }
+  if (position === 0) {
+    position = maxPlayers - 1;
+  } else {
+    position--;
+  }
+
+  console.log("position after drawing cards: " + position);
+  await Games.updateGamePosition(game_id, position);
+};
+
+const wildCardReverse = async (game_id) => {
+  //get position of player that is drawing the cards
+  let maxPlayers = players.length;
+  draw4AfterPosition = position;
+  if (draw4AfterPosition === 0) {
+    draw4AfterPosition = maxPlayers - 1;
+  } else {
+    draw4AfterPosition--;
+  }
+  if (position === maxPlayers - 1) {
+    position = 0;
+  } else {
+    position++;
+  }
+
+  console.log("position after drawing cards: " + position);
+  await Games.updateGamePosition(game_id, position);
+};
+
+
+
+
+  const drawACard = async (card, game_id, user_id) => {
   const cardID_arr = getCardID(card);
   let card_id = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
   await user_cards.drawCard(game_id, user_id, card_id);
