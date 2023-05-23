@@ -399,7 +399,16 @@ Game.playCard = async (req, res) => {
     position
   );
 
+  if (playedNumber === 10 || playedNumber === 11 || playedNumber === 12) {
+    //do nothing, since we already skipped the next player
+  } else if (isInReverse) {
+    await reverseGameOrder(game_id);
+  } else {
+    await updatePosition(game_id);
+  }
+
   const currentPlayerName = await getCurrentPlayerName(game_id);
+  console.log("current player: " + currentPlayerName);
 
   io.in(game_id).emit(PLAY_CARD, {
     card_id,
@@ -410,20 +419,12 @@ Game.playCard = async (req, res) => {
     currentPlayerName,
     draw2CardsUserId,
   });
+
   res.send({
     message: "Played card: " + card_id,
     playerInfo: playerInfo,
     status: 200,
   });
-
-  if (playedNumber === 10 || playedNumber === 11 || playedNumber === 12) {
-    //do nothing, since we already skipped the next player
-  } else if (isInReverse) {
-    await reverseGameOrder(game_id);
-  } else {
-    await updatePosition(game_id);
-  }
-
 };
 
 // uno rules condition
