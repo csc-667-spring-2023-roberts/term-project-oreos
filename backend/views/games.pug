@@ -7,13 +7,12 @@ block content
 
   //- Heading
   div(class = "h1")
-    h1 Game #{id} Page (Authenticated)
+    h1 Game Room #{id}
 
   input(class="quit-btn" id="quit-btn-id" type='button' value='Quit' onclick="saveGameState()")
-  input(class="quit-btn" id="quit-btn-id" type='button' value='Start Game' onclick="startGame")
+  input(class="quit-btn" id="quit-btn-id" type='button' value='Start Game' onclick="initCards()")
 
   h3(id="num-of-players-id" class="num-players") Number of Players: 
-
 
   //- Gameplay screen
   div(class='pile-container')
@@ -28,24 +27,11 @@ block content
       h3 Discard Pile
       img(id="discard-img-id" src='', alt='Discard Pile' height="135px" width="100px")
 
-    
-
   div(class="call-uno-container" id="call-uno-container-id")
     h3(id="call-uno-msg-id")
 
-  div(class='draw-color-container')
-    div(class="call-uno-container" id="red-container-id")
-      button(class = "red-btn") RED
-      
-    div(class="call-uno-container" id="blue-uno-container-id")
-      button(class = "blue-btn" ) BLUE
-
-    div(class="call-uno-container" id="green-uno-container-id")
-      button(class = "green-btn" ) GREEN
-    
-    div(class="call-uno-container" id="yellow-uno-container-id")
-      button(class = "yellow-btn" ) YELLOW
-
+  h3(id="game-msg-id" style="color: yellow; padding: 10px;")
+  h3(id="current-player-name-id" style="color: green; padding: 10px;")
 
   //- Hands
   div(class="game-container")
@@ -61,12 +47,14 @@ block content
     //- Chatbox
     div(class="chat-list-container")
       h1 Chat
-      div(class="chat-list" id="chat-list-id")
+      div(class="chat-form-container")
+        form(id="send-chat-form-id" class="msg-form" onsubmit="sendMessage(); return false;")
+          input(type='text' class="msg-input" name="message" required)
+          input(type='submit' class="msg-btn" value='Send')  
+        div(class="chat-list" id="chat-list-id")
       
-      form(id="send-chat-form-id" class="msg-form" onsubmit="sendMessage(); return false;")
-        em Message
-        input(type='text' class="msg-input" name="message" required)
-        input(type='submit' class="msg-btn" value='Send')  
+
 
       
+
 

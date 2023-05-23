@@ -17,6 +17,7 @@ let position = 0;
 let players = [];
 let hostPlayer = {};
 let cardsSet = new Set();
+let isInReverse = false;
 
 const shuffleCards = (cards) => {
   let temp = null;
@@ -55,6 +56,12 @@ const getCardID = (str) => {
   }
 
   return null;
+};
+
+const getCurrentPlayerName = async (game_id) => {
+  const player = await Games.getCurrentPlayerName(game_id, position);
+  const username = "Current Turn: " + player?.username;
+  return username;
 };
 
 const getRandomCard = () => {
@@ -183,6 +190,7 @@ Game.startGame = async (req, res) => {
 
     let isPlayerExist = await Games.isPlayerExist(user_id, game_id);
     isPlayerExist = isPlayerExist?.user_id || null;
+    const currentPlayerName = await getCurrentPlayerName(game_id);
 
     if (isPlayerExist) {
       const userCards = await Games.getAllUserCards(user_id, game_id);
@@ -216,6 +224,7 @@ Game.startGame = async (req, res) => {
         top_discard,
         game_id,
         players,
+        currentPlayerName,
       });
       res.send({
         message: "Game already started",
@@ -268,6 +277,7 @@ Game.startGame = async (req, res) => {
       top_discard,
       game_id,
       players,
+      currentPlayerName,
     });
     res.send({
       message: "Game started",
@@ -287,35 +297,6 @@ Game.endGame = async (req, res) => {
   // TODO implement
   res.send({ message: "Game ended" });
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // ------------------------
 // Play Card
@@ -338,19 +319,14 @@ Game.playCard = async (req, res) => {
   //loop through players, if uid matches then assign playerInfo
   for (let i = 0; i < players.length; i++) {
     if (user_id === players[i].user_id) {
-      // let idx = Array.from(players[i].hand.indexOf(card_id));
-      // players[i].hand.splice(idx, 1);
       playerInfo = players[i];
+      break;
     }
   }
-
-  console.log("Player's Hand before checking rule")
-  console.log(playerInfo);
 
   //Add your UNO rules condition here
   const followsUNORules = checkUNORules(card_id, playerInfo.hand);
 
-  
   if (!followsUNORules) {
     res.status(400).send({
       message: "Card does not follow UNO rules: " + card_id,
@@ -359,9 +335,46 @@ Game.playCard = async (req, res) => {
     });
     return;
   }
+  const isValidTurn = await checkTurn(game_id, user_id);
+  if (isValidTurn === false) {
+    res.send({
+      message: "Not your turn",
+      status: 400,
+    });
+    return;
+  }
 
+  let draw2CardsUserId = "";
+  if (user_id === playerInfo.user_id) {
+    let idx = Array.from(playerInfo.hand.indexOf(card_id));
+    playerInfo.hand.splice(idx, 1);
+  }
 
-  console.log("Player's Hand AFTER checking rule")
+  const playedNumber = parseInt(card_id.split("-")[1]);
+
+  if (playedNumber === 10) {
+    if (isInReverse) {
+      console.log("reverse skip");
+      await skipNextPlayerReverse();
+    } else {
+      console.log("skip");
+      await skipNextPlayer();
+    }
+  }
+  if (playedNumber === 11) {
+    if (isInReverse) {
+      await updatePosition(game_id);
+    } else {
+      await reverseGameOrder(game_id);
+    }
+  }
+  if (playedNumber === 12) {
+    //reverse not implemented yet
+    const draw2UserId = await drawTwoCards(game_id);
+    draw2CardsUserId = draw2UserId;
+  }
+
+  console.log("Player's Hand AFTER checking rule");
   console.log(playerInfo);
 
   top_discard = card_id;
@@ -386,12 +399,16 @@ Game.playCard = async (req, res) => {
     position
   );
 
+  const currentPlayerName = await getCurrentPlayerName(game_id);
+
   io.in(game_id).emit(PLAY_CARD, {
     card_id,
     game_id,
     user_id,
     top_discard,
     players,
+    currentPlayerName,
+    draw2CardsUserId,
   });
   res.send({
     message: "Played card: " + card_id,
@@ -399,6 +416,13 @@ Game.playCard = async (req, res) => {
     status: 200,
   });
 
+  if (playedNumber === 10 || playedNumber === 11 || playedNumber === 12) {
+    //do nothing, since we already skipped the next player
+  } else if (isInReverse) {
+    await reverseGameOrder(game_id);
+  } else {
+    await updatePosition(game_id);
+  }
 
 };
 
@@ -419,6 +443,10 @@ const checkUNORules = (card_id, playerHand) => {
     console.log("When Card matches 1: " + playerHand);
     return true;
   }
+  if (playedColor === 4) {
+    console.log("Special card");
+    return true;
+  }
 
   // for (let card of playerHand) {
   //   const cardColor = parseInt(card.split("-")[0]);
@@ -429,51 +457,103 @@ const checkUNORules = (card_id, playerHand) => {
   //     return true;
   //   }
   // }
-
   return false;
-}; 
+};
 
+const checkTurn = async (game_id, user_id) => {
+  let playerTurn = await Games.getPlayerTurn(game_id, user_id);
+  let gamePosition = await Games.getCurrentGamePosition(game_id);
+  console.log("playerTurn: " + playerTurn);
+  console.log("gamePosition: " + gamePosition);
+  console.log("isInReverse: " + isInReverse);
+  console.log("playerTurn === gamePosition: " + (playerTurn === gamePosition));
+  return playerTurn === gamePosition;
+};
 
+const updatePosition = async (game_id) => {
+  let maxPlayers = players.length;
+  if (position === maxPlayers - 1) {
+    position = 0;
+  } else {
+    position++;
+  }
+  isInReverse = false;
+  await Games.updateGamePosition(game_id, position);
+};
 
+const reverseGameOrder = async (game_id) => {
+  let maxPlayers = players.length;
+  if (position === 0) {
+    position = maxPlayers - 1;
+  } else {
+    position--;
+  }
+  isInReverse = true;
+  await Games.updateGamePosition(game_id, position);
+};
 
+const skipNextPlayer = async (game_id) => {
+  let maxPlayers = players.length;
+  if (position === maxPlayers - 1) {
+    position = 1;
+  } else if (position === maxPlayers - 2) {
+    position = 0;
+  } else {
+    position += 2;
+  }
+  console.log("position: " + position);
+  await Games.updateGamePosition(game_id, position);
+};
 
+const skipNextPlayerReverse = async (game_id) => {
+  let maxPlayers = players.length;
+  if (position === 0) {
+    position = maxPlayers - 2;
+  } else if (position === 1) {
+    position = maxPlayers - 1;
+  } else {
+    position -= 2;
+  }
+  await Games.updateGamePosition(game_id, position);
+};
 
+const drawTwoCards = async (game_id) => {
+  let randomCard1 = getRandomCard();
+  let randomCard2 = getRandomCard();
+  //you might need these for the front end?? idk
+  let card1 = `${randomCard1[0]}-${randomCard1[1]}.png`;
+  let card2 = `${randomCard2[0]}-${randomCard2[1]}.png`;
 
+  //get position of player that is drawing the cards
+  let maxPlayers = players.length;
+  if (position === maxPlayers - 1) {
+    position = 0;
+  } else {
+    position++;
+  }
 
+  console.log("player drawing cards position: " + position);
+  const user_id = await Games.getUserID(game_id, position);
+  await drawACard(card1, game_id, user_id);
+  await drawACard(card2, game_id, user_id);
+  //now skip that player's turn
+  if (position === maxPlayers - 1) {
+    position = 0;
+  } else {
+    position++;
+  }
 
+  console.log("position after drawing cards: " + position);
+  await Games.updateGamePosition(game_id, position);
+  return user_id;
+};
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+const drawACard = async (card, game_id, user_id) => {
+  const cardID_arr = getCardID(card);
+  let card_id = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
+  await user_cards.drawCard(game_id, user_id, card_id);
+};
+//leave space here for now
 
 Game.drawCard = async (req, res) => {
   const { game_id, user_id } = req.body;
@@ -521,12 +601,15 @@ Game.drawCard = async (req, res) => {
       position
     );
 
+    const currentPlayerName = await getCurrentPlayerName(game_id);
+
     io.in(game_id).emit(DRAW_CARD, {
       game_id,
       user_id,
       top_discard,
       top_deck,
       players,
+      currentPlayerName,
     });
 
     res.send({
@@ -538,15 +621,21 @@ Game.drawCard = async (req, res) => {
     });
     return;
   }
+  const isValidTurn = await checkTurn(game_id, user_id);
+  if (isValidTurn === false) {
+    res.send({
+      message: "Not your turn",
+      status: 400,
+    });
+    return;
+  }
 
   const card = top_deck;
   playerInfo.hand?.push(card);
   playerInfoNewCards.hand?.push(card);
   cardsSet.add(top_deck);
   //find card ID before sending to db
-  const cardID_arr = getCardID(card);
-  let card_id = await user_cards.findCardID(cardID_arr[0], cardID_arr[1]);
-  await user_cards.drawCard(game_id, user_id, card_id);
+  await drawACard(card, game_id, user_id);
 
   const top_deck_arr = getRandomCard();
   let randomCard = `${top_deck_arr[0]}-${top_deck_arr[1]}.png`;
@@ -570,12 +659,15 @@ Game.drawCard = async (req, res) => {
     position
   );
 
+  const currentPlayerName = await getCurrentPlayerName(game_id);
+
   io.in(game_id).emit(DRAW_CARD, {
     game_id,
     user_id,
     top_discard,
     top_deck,
     players,
+    currentPlayerName,
   });
 
   res.send({
@@ -599,6 +691,14 @@ Game.callUno = async (req, res) => {
 
   if (!user_id || !game_id) {
     res.send({ message: "Bad Request", status: 400 });
+    return;
+  }
+  const isValidTurn = await checkTurn(game_id, user_id);
+  if (isValidTurn === false) {
+    res.send({
+      message: "Not your turn",
+      status: 400,
+    });
     return;
   }
 

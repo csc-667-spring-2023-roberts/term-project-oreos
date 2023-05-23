@@ -110,6 +110,45 @@ const getPlayerCards = async (game_id, user_id) => {
   );
 };
 
+const getPlayerTurn = async (game_id, user_id) => {
+  const result = await db.one(
+    "SELECT turn FROM game_users WHERE game_id=$1 AND user_id=$2",
+    [game_id, user_id]
+  );
+  return parseInt(result.turn);
+};
+
+const getCurrentPlayerName = async (game_id, position) => {
+  return await db.oneOrNone(
+    "SELECT username FROM game_users AS gu INNER JOIN users AS u ON gu.user_id=u.id WHERE gu.game_id=$1 AND gu.turn=$2",
+    [game_id, position]
+  );
+};
+
+const getCurrentGamePosition = async (game_id) => {
+  const result = await db.one(
+    "SELECT position FROM games WHERE id=$1",
+    game_id
+  );
+  return parseInt(result.position);
+};
+
+const updateGamePosition = async (game_id, position) => {
+  return await db.oneOrNone(
+    "UPDATE games SET position=$2 WHERE id=$1 RETURNING position",
+    [game_id, position]
+  );
+};
+
+const getUserID = async (game_id, turn) => {
+  const result = await db.one(
+    "SELECT user_id FROM game_users WHERE game_id=$1 AND turn=$2",
+    [game_id, turn]
+  );
+  return parseInt(result.user_id);
+};
+
+
 module.exports = {
   create,
   getAll,
@@ -125,4 +164,9 @@ module.exports = {
   isPlayerStarted,
   isPlayerExist,
   getPlayerCards,
+  getPlayerTurn,
+  getCurrentGamePosition,
+  updateGamePosition,
+  getCurrentPlayerName,
+  getUserID,
 };

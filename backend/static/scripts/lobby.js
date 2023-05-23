@@ -83,8 +83,8 @@ const getAllGames = async () => {
 
     messageArray.map((msg) => {
       let li = document.createElement("div");
-      li.className = "message";
-      li.innerHTML = `<a href="/waitingroom/${msg.id}">Title: ${msg.game_title}, # ${msg.id}, Players: ${msg.users_required}, Started: ${msg.ongoing}</a>`;
+      li.className = "game";
+      li.innerHTML = `<a class="game-room-link" href="/waitingroom/${msg.id}">Title: ${msg.game_title}, # ${msg.id}, Players: ${msg.users_required}, Started: ${msg.ongoing}</a>`;
       gameList.appendChild(li);
     });
   } catch (err) {
@@ -123,7 +123,24 @@ const getAllMessages = async () => {
 
       let li = document.createElement("div");
       li.className = "message";
-      li.innerHTML = `${msg.username} ${createdAtFormatted}: ${msg.message}`;
+
+      let usernameSpan = document.createElement("span");
+      usernameSpan.style.fontWeight = "bold";
+      usernameSpan.textContent = msg.username;
+
+      let createdAtSpan = document.createElement("span");
+      createdAtSpan.style.marginLeft = "5px";
+      createdAtSpan.textContent = createdAtFormatted;
+
+      let messageP = document.createElement("p");
+      messageP.style.margin = "5px";
+      messageP.textContent = msg.message;
+
+      li.appendChild(usernameSpan);
+      li.appendChild(createdAtSpan);
+      li.appendChild(document.createTextNode(": "));
+      li.appendChild(messageP);
+
       chatList.appendChild(li);
     });
   } catch (err) {

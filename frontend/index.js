@@ -1,4 +1,3 @@
-console.log("Hello from a bundled  assetsss.");
 import io from "socket.io-client";
 import { getGameId } from "./get-game-id";
 import { showMessage } from "./show-alert-message";
@@ -41,7 +40,7 @@ socket.on(CREATE_GAME, ({ gametitle, count, game_id, ongoing }) => {
   }
 
   let li = document.createElement("div");
-  li.style.backgroundColor = "rgb(59, 245, 149)";
+  li.style.backgroundColor = "rgb(139, 246, 210)";
   li.style.marginBottom = "1px";
   li.innerHTML = `<a class="game-room-link" href="/waitingroom/${game_id}">Title: ${gametitle}, # ${game_id} Players: ${count}, Started: ${ongoing}</a>`;
   gamesList.appendChild(li);
@@ -65,7 +64,24 @@ socket.on(CHAT, ({ message, username }) => {
   let li = document.createElement("div");
   li.style.backgroundColor = "rgb(59, 245, 149)";
   li.style.marginBottom = "1px";
-  li.innerHTML = `${username} ${createdAtFormatted}: ${message}`;
+
+  let usernameSpan = document.createElement("span");
+  usernameSpan.style.fontWeight = "bold";
+  usernameSpan.textContent = username;
+
+  let createdAtSpan = document.createElement("span");
+  createdAtSpan.style.marginLeft = "5px";
+  createdAtSpan.textContent = createdAtFormatted;
+
+  let messageP = document.createElement("p");
+  messageP.style.margin = "5px";
+  messageP.textContent = message;
+
+  li.appendChild(usernameSpan);
+  li.appendChild(createdAtSpan);
+  li.appendChild(document.createTextNode(": "));
+  li.appendChild(messageP);
+
   chatList.appendChild(li);
 });
 
@@ -99,19 +115,26 @@ const updateOpponentCards = (players) => {
   });
 };
 
-socket.on(START_GAME, ({ top_deck, top_discard, players }) => {
-  if (
-    !document.getElementById("deck-img-id") ||
-    !document.getElementById("discard-img-id")
-  ) {
-    return;
+socket.on(
+  START_GAME,
+  ({ top_deck, top_discard, players, currentPlayerName }) => {
+    console.log(currentPlayerName);
+    if (
+      !document.getElementById("deck-img-id") ||
+      !document.getElementById("discard-img-id") ||
+      !document.getElementById("current-player-name-id")
+    ) {
+      return;
+    }
+
+    document.getElementById("deck-img-id").src = imgPath + top_deck;
+    document.getElementById("discard-img-id").src = imgPath + top_discard;
+    document.getElementById("current-player-name-id").innerText =
+      currentPlayerName;
+
+    updateOpponentCards(players);
   }
-
-  document.getElementById("deck-img-id").src = imgPath + top_deck;
-  document.getElementById("discard-img-id").src = imgPath + top_discard;
-
-  updateOpponentCards(players);
-});
+);
 
 socket.on(JOIN_GAME, ({ message, numPlayers }) => {
   if (!document.getElementById("num-of-players-id")) {
@@ -139,13 +162,24 @@ socket.on(LEAVE_GAME, ({ message, numPlayers }) => {
   showMessage(message);
 });
 
-socket.on(PLAY_CARD, ({ top_discard, players }) => {
-  document.getElementById("discard-img-id").src = imgPath + top_discard;
-  updateOpponentCards(players);
-});
+socket.on(
+  PLAY_CARD,
+  ({ top_discard, game_id, players, currentPlayerName, draw2CardsUserId }) => {
+    if (draw2CardsUserId && draw2CardsUserId === user.id) {
+      window.location.href = `/games/${game_id}`;
+      return;
+    }
+    document.getElementById("discard-img-id").src = imgPath + top_discard;
+    document.getElementById("current-player-name-id").innerText =
+      currentPlayerName;
+    updateOpponentCards(players);
+  }
+);
 
-socket.on(DRAW_CARD, ({ top_deck, players }) => {
+socket.on(DRAW_CARD, ({ top_deck, players, currentPlayerName }) => {
   document.getElementById("deck-img-id").src = imgPath + top_deck;
+  document.getElementById("current-player-name-id").innerText =
+    currentPlayerName;
   updateOpponentCards(players);
 });
 
