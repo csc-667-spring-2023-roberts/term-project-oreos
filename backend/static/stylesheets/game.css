@@ -126,3 +126,36 @@
   border: 2px solid white;
   height: 600px;
 }
+
+.draw-color-container {
+  display: flex;
+  justify-content: center;
+}
+
+.red-btn {
+  height: 40px;
+  width: 80px;
+  background-color: rgb(244, 4, 4);
+  font-size: 15px;
+}
+
+.blue-btn {
+  height: 40px;
+  width: 80px;
+  background-color: rgba(13, 13, 250, 0.924);
+  font-size: 15px;
+}
+
+.green-btn {
+  height: 40px;
+  width: 80px;
+  background-color: rgb(7, 255, 24);
+  font-size: 15px;
+}
+
+.yellow-btn {
+  height: 40px;
+  width: 80px;
+  background-color: rgb(230, 255, 5);
+  font-size: 15px;
+}
